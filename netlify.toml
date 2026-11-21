@@ -9,3 +9,16 @@
   for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Permanent, forced redirects from the legacy Netlify hostnames to the custom domain
+[[redirects]]
+  from = "https://jdnayak.netlify.app/*"
+  to = "https://jdnayak.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://jdnayak.netlify.com/*"
+  to = "https://jdnayak.com/:splat"
+  status = 301
+  force = true
