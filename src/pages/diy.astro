@@ -1,0 +1,64 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features from '~/components/widgets/Features.astro';
+
+const metadata = {
+  title: 'DIY & Making',
+  description:
+    'Parametric OpenSCAD design, 3D printing, ESPHome sensors, Raspberry Pi and Orange Pi projects, OpenWrt and hardware hacking by JD Nayak.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="DIY and making" title="Design it, print it, flash it, wire it">
+    <Fragment slot="subtitle">
+      If I can design it, print it, flash it or wire it myself, I will try. DIY is how I keep my hands connected to the
+      physical side of the technology I work on all day.
+    </Fragment>
+  </HeroText>
+
+  <Content
+    tagline="From model to object"
+    title="Parameters instead of fixed dimensions"
+    image={{ src: '~/assets/images/diy.svg', alt: '3D printer printing a parametric swivel mount' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>Designs start as OpenSCAD code, so a change of bolt size or wall thickness is a one-line edit followed by a reprint.</p>
+    </Fragment>
+  </Content>
+
+  <Features
+    id="areas"
+    tagline="Areas"
+    title="What I make"
+    columns={2}
+    items={[
+      {
+        title: 'Parametric 3D design and printing',
+        description:
+          'Designs in OpenSCAD with parameters instead of fixed dimensions. A three-part swivel wall mount with a clevis and fork-and-boss joint using M5 hardware, plus mounts, brackets and enclosures for homelab and smart-home gear.',
+        icon: 'tabler:printer',
+      },
+      {
+        title: 'Embedded and single-board computing',
+        description:
+          'ESPHome-based sensors and devices. Raspberry Pi and Orange Pi projects, including low-level boot, PMIC and memory troubleshooting on the H618 platform. Wireless hardware tuning: regulatory domains, 5 GHz behaviour and 802.11n optimisation on USB adapters.',
+        icon: 'tabler:cpu',
+      },
+      {
+        title: 'Home and hardware hacking',
+        description:
+          'Smart-home retrofits that bring cloud-tied devices under local control. Network gear flashing and customisation with OpenWrt. Consumer electronics and drones: researching, comparing and modifying.',
+        icon: 'tabler:tool',
+      },
+      {
+        title: 'Making things visible',
+        description: 'Animated SVG dashboards, interactive 3D explainers and physical-meets-digital projects.',
+        icon: 'tabler:eye',
+      },
+    ]}
+  />
+</Layout>

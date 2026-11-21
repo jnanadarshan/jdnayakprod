@@ -6,73 +6,45 @@ import Features2 from '~/components/widgets/Features2.astro';
 
 const metadata = {
   title: 'Contact',
+  description: 'Get in touch with JD Nayak about agentic AI for semiconductor fabs, MES modernisation, open source or homelab topics.',
 };
 ---
 
 <Layout metadata={metadata}>
-  <!-- HeroText Widget ******************* -->
-
-  <HeroText tagline="Contact" title="Let's Connect!" />
+  <HeroText tagline="Contact" title="Let's connect" />
 
   <ContactUs
     id="form"
-    title="Drop us a message today!"
-    subtitle="For quicker answers, explore our FAQs section. You may find the solution you're looking  for right there! If not, our support team is delighted to help you."
+    title="Send me a message"
+    subtitle="Tell me a little about what you are working on and I will get back to you."
     inputs={[
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Name',
-      },
-      {
-        type: 'email',
-        name: 'email',
-        label: 'Email',
-      },
+      { type: 'text', name: 'name', label: 'Name' },
+      { type: 'email', name: 'email', label: 'Email' },
     ]}
-    textarea={{
-      label: 'Message',
-    }}
+    textarea={{ label: 'Message' }}
     disclaimer={{
-      label:
-        'By submitting this contact form, you acknowledge and agree to the collection of your personal information.',
+      label: 'I will use your details only to reply to this message.',
     }}
-    description="Our support team typically responds within 24 business hours."
+    description="I read every message and reply as soon as I can."
   />
 
-  <!-- Features2 Widget ************** -->
-
   <Features2
-    title="We are here to help!"
+    title="What I am happy to talk about"
     items={[
       {
-        title: 'General support',
-        description: `Chat with us for inquiries related to account management, website navigation, payment issues, accessing purchased templates or general questions about the website's functionality.`,
+        title: 'AI in the fab',
+        description: 'Virtual metrology, defect root-cause analysis, FDC, chamber matching and staged autonomy.',
+        icon: 'tabler:cpu',
       },
       {
-        title: 'Contact sales',
-        description:
-          'Chat with us for questions about purchases, customization options, licensing for commercial use, inquiries about specific template, etc.',
+        title: 'MES/MOM and integration',
+        description: 'MES modernisation, SEMI standards, IT/OT convergence and federated integration.',
+        icon: 'tabler:plug-connected',
       },
       {
-        title: 'Technical support',
-        description:
-          'Chat with us when facing issues like template installation, problems editing difficulties, compatibility issues with software or download errors, or other technical challenges related to using the templates.',
-      },
-      {
-        title: 'Phone',
-        description: '+1 (234) 567-890',
-        icon: 'tabler:headset',
-      },
-      {
-        title: 'Email',
-        description: 'contact@support.com',
-        icon: 'tabler:mail',
-      },
-      {
-        title: 'Location',
-        description: '1234 Lorem Ipsum St, 12345, Miami, EEUU',
-        icon: 'tabler:map-pin',
+        title: 'Open source and tools',
+        description: 'Simulators, learning tools, agent architectures and community write-ups.',
+        icon: 'tabler:brand-github',
       },
     ]}
   />

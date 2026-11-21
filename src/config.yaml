@@ -1,6 +1,6 @@
 site:
   name: Jnanadarshan Nayak | JDNayak.com
-  site: 'https://jdnayak.netlify.app'
+  site: 'https://jdnayak.com'
   base: '/'
   trailingSlash: false
 
@@ -10,21 +10,19 @@ site:
 metadata:
   title:
     default: JDNayak.com
-    template: '%s — AstroWind'
-  description: "\U0001F680 Suitable for Startups, Small Business, Sass Websites, Professional Portfolios, Marketing Websites, Landing Pages & Blogs."
+    template: '%s — JD Nayak'
+  description: "JD Nayak: Head of Semiconductor Strategy & Semiconductor Manufacturing Practice at TCS. Agentic AI for fabs, 3D semiconductor simulators, open source tools, homelab and DIY projects."
   robots:
     index: true
     follow: true
   openGraph:
-    site_name: AstroWind
+    site_name: JDNayak.com
     images:
       - url: '~/assets/images/default.png'
         width: 1200
         height: 628
     type: website
   twitter:
-    handle: '@onwidget'
-    site: '@onwidget'
     cardType: summary_large_image
 
 i18n:

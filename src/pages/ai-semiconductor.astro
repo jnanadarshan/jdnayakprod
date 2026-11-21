@@ -1,0 +1,353 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features from '~/components/widgets/Features.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'AI × Semiconductor',
+  description:
+    'Agentic AI for semiconductor fabs: virtual metrology, defect root-cause analysis, trace data FDC, chamber matching, SEMI-standard integration and MES/MOM modernisation.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText
+    tagline="Core focus"
+    callToAction={{ text: 'Agentic AI thesis', href: '/agentic-ai' }}
+    callToAction2={{ text: 'Discuss a project', href: '/contact' }}
+  >
+    <Fragment slot="title">
+      AI that runs the factory, <span class="text-accent dark:text-white highlight">not just watches it</span>
+    </Fragment>
+    <Fragment slot="subtitle">
+      I help semiconductor manufacturers adopt AI that actually runs the fab, and I build the tools to prove it.
+    </Fragment>
+  </HeroText>
+
+  <Content
+    image={{ src: '~/assets/images/fab-flow.svg', alt: 'Front-end wafer process loop' }}
+    tagline="Thesis" title="The shape of AI in the fab is changing">
+    <Fragment slot="content">
+      <p class="mb-4">
+        Semiconductor manufacturing is the most data-rich, process-controlled and standards-driven manufacturing
+        environment in the world, and also one of the hardest to automate end to end. A modern fab produces enormous
+        volumes of sensor, metrology, inspection, equipment-state and WIP data every second, yet many of the decisions
+        that matter are still made by engineers sifting through charts, tickets and tribal knowledge.
+      </p>
+      <p class="mb-4">
+        AI has been in the fab for years: APC, FDC, SPC, virtual metrology and ADC are all forms of applied machine
+        learning. What is changing now is the <strong>shape</strong> of AI in the fab:
+      </p>
+      <ul class="list-disc pl-5 space-y-2 mb-4">
+        <li>from <strong>models that predict</strong> to <strong>agents that investigate, decide and act</strong></li>
+        <li>from <strong>point solutions</strong> per tool or use case to a <strong>shared knowledge and orchestration layer</strong></li>
+        <li>from <strong>dashboards for humans</strong> to <strong>supervised autonomy</strong> with clear guardrails</li>
+        <li>from <strong>bolt-on AI</strong> to <strong>AI infused into the manufacturing execution fabric</strong> (MES, equipment automation, data platforms)</li>
+      </ul>
+      <p>My work is about making that shift practical, safe and adoptable.</p>
+    </Fragment>
+  </Content>
+
+  <Features3
+    id="domain"
+    tagline="Domain foundation"
+    title="Credible AI in a fab starts with credible domain knowledge"
+    subtitle="This is the part generic AI practitioners lack, and the part I treat as non-negotiable."
+    columns={2}
+    items={[
+      {
+        title: 'Process and equipment',
+        description:
+          'Lithography (DUV and EUV context), etch, CVD/PVD, CMP, diffusion, implant and wet clean. Metrology and inspection: overlay, CD, film thickness, defect inspection, review and classification. Advanced packaging: 2.5D/3D integration, TSV formation, wafer thinning, micro-bumping, die bonding and underfill. Equipment behaviour: chamber matching, PM and recipe management, tool health and state models.',
+        icon: 'tabler:building-factory-2',
+      },
+      {
+        title: 'Factory control and data',
+        description:
+          'APC (R2R control), FDC, SPC, trace data analytics and virtual metrology. MES/MOM: scheduling, dispatching, WIP tracking, lot genealogy, recipe management and deployment lifecycle. AMHS and material flow. Digital thread and data mesh patterns for the fab.',
+        icon: 'tabler:chart-dots',
+      },
+      {
+        title: 'Standards and integration',
+        description:
+          'SEMI E10 (equipment states), E30 (GEM), E37 (HSMS), E40 (process job management), E87 (carrier management), E90 (substrate tracking) and E94 (control job management). SECS/GEM and EDA / Interface A for equipment connectivity. IT/OT convergence between the shop floor and enterprise systems (ERP, PLM, CRM).',
+        icon: 'tabler:plug-connected',
+      },
+      {
+        title: 'MES/MOM platform landscape',
+        description:
+          'Working knowledge of the major semiconductor MES/MOM platforms and how each fits different segments: leading-edge logic, memory, analog and mixed-signal, power and compound, OSAT and electronics manufacturing.',
+        icon: 'tabler:layout-grid',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Equipment is the data source"
+    title="Every chamber is a stream of signals"
+    image={{ src: '~/assets/images/etch-chamber.svg', alt: 'Cross-section of a plasma etch process chamber with sensors' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>A process chamber such as a plasma etcher reports gas flows, RF power, pressure and temperature continuously. Those traces feed FDC, chamber matching and virtual metrology, which is why equipment knowledge and data engineering have to be designed together.</p>
+    </Fragment>
+  </Content>
+
+  <Features
+    id="use-cases"
+    tagline="Use cases"
+    title="The first wave of agentic AI in the fab"
+    subtitle="Each use case has a defined data foundation, agent roles, human checkpoints and a staged autonomy path."
+    columns={2}
+    items={[
+      {
+        title: 'Virtual metrology',
+        description:
+          'Predicts metrology outcomes from process and sensor data so measurement can be sampled less, with uncertainty quantified. The engineer reviews low-confidence predictions and approves model changes.',
+        icon: 'tabler:ruler-measure',
+      },
+      {
+        title: 'Defect inspection and root-cause analysis',
+        description:
+          'Classifies defects with vision models, clusters unknown patterns, correlates them with process and equipment history and proposes root causes. The engineer confirms causes and disposition before action.',
+        icon: 'tabler:microscope',
+      },
+      {
+        title: 'Trace data and FDC',
+        description:
+          'Streams and analyses equipment sensor traces, detects drift and faults, and explains why an alarm fired. The engineer tunes limits and signs off on holds.',
+        icon: 'tabler:activity',
+      },
+      {
+        title: 'Chamber matching',
+        description:
+          'Detects divergence between chambers on the same tool type and recommends corrective adjustments. The process owner approves recipe or hardware changes.',
+        icon: 'tabler:arrows-diff',
+      },
+      {
+        title: 'Scheduling and dispatching',
+        description:
+          'Recommends or executes dispatch decisions with awareness of WIP risk and cycle time. The operations team sets policy and can override.',
+        icon: 'tabler:route',
+      },
+      {
+        title: 'WIP-at-risk and cycle-time prediction',
+        description:
+          'Scores lots and flows for risk, forecasts cycle time and flags bottleneck formation. The planner acts on prioritised alerts.',
+        icon: 'tabler:clock-exclamation',
+      },
+      {
+        title: 'Competitive and market intelligence',
+        description:
+          'Continuously extracts and structures vendor, filing and market signals. Strategy teams decide what to do with them.',
+        icon: 'tabler:radar',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Measure less, know more"
+    title="Virtual metrology in one picture"
+    image={{ src: '~/assets/images/wafer-metrology.svg', alt: 'Wafer map with measured and predicted sites and an uncertainty band' }}
+    isReversed={true}
+  >
+    <Fragment slot="content">
+      <p>Only some wafer sites are measured. Virtual metrology predicts the rest from process data and attaches an uncertainty interval, so engineers review the low-confidence sites instead of every site.</p>
+    </Fragment>
+  </Content>
+
+  <Features3
+    id="architecture"
+    tagline="Architecture patterns"
+    title="Five layers, designed together"
+    columns={1}
+    items={[
+      {
+        title: 'Knowledge layer: teach the agent the fab',
+        description:
+          'Process Knowledge Models (PKM) are structured, versioned, YAML-based descriptions of processes, equipment, parameters, limits and relationships, and the agent reasons over them instead of guessing. Ontology integration aligns to open semiconductor ontologies, including the Digital Reference ontology from the ECSEL / Infineon-led work, so knowledge is shareable, queryable and consistent across applications. I have evaluated GraphDB, Apache Jena Fuseki and Oxigraph as triplestores, with TBox/ABox separation patterns and ontology visualisation tooling.',
+        icon: 'tabler:books',
+      },
+      {
+        title: 'Orchestration layer: let agents collaborate, safely',
+        description:
+          'LangGraph and LangChain multi-agent StateGraphs, for example a 10-node graph for chamber matching and a six-agent roster for virtual metrology. Durable, Temporal-style workflow orchestration for long-running, auditable investigations. MCP (Model Context Protocol) tools give agents controlled access to MES, data platforms and analysis tools. An agent marketplace architecture on Node.js and Docker handles discovering, composing and governing reusable agents.',
+        icon: 'tabler:topology-star-3',
+      },
+      {
+        title: 'Intelligence layer: the models underneath',
+        description:
+          'Statistical process control and multivariate methods: EWMA, CUSUM, PCA and Hotelling\'s T². Ensemble ML models with conformal prediction for calibrated uncertainty. Vision models (ViT, ConvNeXt) for defect classification, HDBSCAN for unsupervised pattern discovery and Triton for inference serving. MLflow for experiment tracking and model lifecycle, with vector databases for retrieval.',
+        icon: 'tabler:brain',
+      },
+      {
+        title: 'Data layer: the plumbing',
+        description:
+          'Streaming pipelines on Kafka and Flink, time-series storage in TimescaleDB, relational and vector storage in PostgreSQL with pgvector, and SEMI-compliant equipment connectivity and MES integration.',
+        icon: 'tabler:database',
+      },
+      {
+        title: 'Control layer: autonomy you can trust',
+        description:
+          'Human-in-the-loop interrupt gates at defined decision points. Progressive autonomy staging: advise, recommend with approval, act within bounds, act and report. Full audit trails, rollback paths and confidence thresholds are first-class design elements, not afterthoughts.',
+        icon: 'tabler:shield-check',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Control layer"
+    title="Knowledge, agents, gates and tools"
+    image={{ src: '~/assets/images/agent-loop.svg', alt: 'Agent architecture with knowledge model, human gate and MES tools' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>The agent reads a versioned process knowledge model, investigates with tools exposed through MCP, and hands every consequential action to a human gate. The audit trail feeds back into the knowledge model.</p>
+    </Fragment>
+  </Content>
+
+  <Features2
+    id="delivery"
+    tagline="Delivery experience"
+    title="What I have designed and delivered"
+    subtitle="A public-safe summary. Client names, commercial terms and proprietary designs are never published."
+    columns={2}
+    items={[
+      {
+        title: 'Lights-out fab roadmaps',
+        description:
+          'CTO-facing proposals covering IT/OT convergence, AMHS automation, agentic AI acceleration, ROI framing and a phased multi-year path.',
+      },
+      {
+        title: 'Agentic AI architecture series',
+        description:
+          'Detailed technical designs for virtual metrology, defect inspection and RCA, trace data FDC and chamber matching, each with a shared pattern: PKM schemas, StateGraph orchestration, HITL patterns and phased adoption.',
+      },
+      {
+        title: 'Federated MES-to-ERP integration',
+        description: 'Hub-and-spoke architectures for multi-fab environments.',
+      },
+      {
+        title: 'SPC and data collection modernisation',
+        description: 'Migration planning for legacy statistical process control platforms and host automation.',
+      },
+      {
+        title: 'Supply chain and component compliance',
+        description:
+          'Traceability and compliance data models, built as a taxonomy for enterprise hardware manufacturers.',
+      },
+      {
+        title: 'Account planning and solutions architecture',
+        description:
+          'Solutions architecture and business development for semiconductor and electronics manufacturing clients across the US, Europe and Asia Pacific.',
+      },
+    ]}
+  />
+
+  <Features3
+    id="intelligence"
+    tagline="Intelligence and market work"
+    title="Understanding the landscape"
+    columns={2}
+    items={[
+      {
+        title: 'MES/MOM competitive intelligence',
+        description:
+          'A structured comparison of six major platforms across five industry segments, delivered as structured data, documentation and an executive deck.',
+        icon: 'tabler:scale',
+      },
+      {
+        title: 'WFE market intelligence hub',
+        description: 'An interactive browser dashboard on the wafer fabrication equipment market.',
+        icon: 'tabler:chart-bar',
+      },
+      {
+        title: 'Competitive Intelligence Platform',
+        description:
+          'A Go, Python, Next.js, PostgreSQL and pgvector design for continuous extraction from public filings and market signals.',
+        icon: 'tabler:file-search',
+      },
+      {
+        title: 'Asia Pacific go-to-market analysis',
+        description: 'Market and go-to-market analysis for semiconductor IT services in Asia Pacific.',
+        icon: 'tabler:world',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Lithography"
+    title="From light source to printed pattern"
+    image={{ src: '~/assets/images/litho.svg', alt: 'Simplified lithography optical path' }}
+    isReversed={true}
+  >
+    <Fragment slot="content">
+      <p>The simulators I build explain machines like this one: DUV light passes through a reticle and a reduction lens, and the stage steps and scans so each die is exposed in turn.</p>
+    </Fragment>
+  </Content>
+
+  <Features
+    id="education"
+    tagline="Education and enablement"
+    title="Making fab knowledge learnable"
+    subtitle="A recurring thread in my work. These are personal projects, built in my own time."
+    columns={2}
+    items={[
+      {
+        title: 'Semiconductor Process Education Platform',
+        description:
+          'A browser-based, AI-powered semiconductor manufacturing education platform with Three.js simulations of front-end and advanced packaging steps: TSV formation, wafer thinning, micro-bump formation, die bonding and underfill.',
+        icon: 'tabler:stack-3',
+      },
+      {
+        title: 'MES Training Simulator',
+        description:
+          'An HTML-based MES training simulator for new engineers, with scheduling and dispatching modules, semiconductor-accurate terminology and light and dark themes.',
+        icon: 'tabler:device-desktop-analytics',
+      },
+      {
+        title: 'Chip packaging simulators',
+        description:
+          'Interactive 3D explorers covering BGA, QFP, SOP, DIP, CSP, WLP, SiP and mounting materials, with hover tooltips and picture-in-picture detail panels.',
+        icon: 'tabler:cpu-2',
+      },
+      {
+        title: 'DUV lithography virtual equipment simulator',
+        description: 'A Go and Node.js build with a SEMI E10-compliant equipment state machine, still in progress.',
+        icon: 'tabler:sun-high',
+      },
+      {
+        title: 'Interactive EUV lithography visualisation',
+        description: 'A 3D explainer of the machine architecture.',
+        icon: 'tabler:3d-cube-sphere',
+      },
+      {
+        title: 'MES deployment lifecycle reference',
+        description: 'A practical guide for implementation teams.',
+        icon: 'tabler:book',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Advanced packaging"
+    title="Stacked dies, TSVs and solder balls"
+    image={{ src: '~/assets/images/chip-package.svg', alt: 'Cross-section of an advanced package with stacked memory and TSVs' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>Packaging is now a process-control problem in its own right: thinning, micro-bumping, bonding and underfill all generate data that agents can use.</p>
+    </Fragment>
+  </Content>
+
+  <CallToAction actions={[{ variant: 'primary', text: 'Get in touch', href: '/contact', icon: 'tabler:mail' }]}>
+    <Fragment slot="title">Planning AI for your fab?</Fragment>
+    <Fragment slot="subtitle">
+      Virtual metrology, defect RCA, FDC, chamber matching, MES integration or a phased path to autonomy.
+    </Fragment>
+  </CallToAction>
+</Layout>

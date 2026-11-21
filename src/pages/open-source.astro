@@ -1,0 +1,80 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Open Source',
+  description:
+    'JD Nayak on open source: documentation and write-ups on travel routers, Raspberry Pi NVMe fixes, macvlan Docker networking, Home Assistant integrations and AWS static-site authentication.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText
+    tagline="Open source"
+    title="Give something back"
+    callToAction={{ text: 'GitHub profile', href: 'https://github.com/jnanadarshan', target: '_blank', icon: 'tabler:brand-github' }}
+  >
+    <Fragment slot="subtitle">
+      I use open source daily and try to give something back: fixes, documentation, and small tools that solve a
+      problem someone else will hit next. If I spent a weekend figuring something out, it is worth an hour to write it
+      down.
+    </Fragment>
+  </HeroText>
+
+  <Features3
+    id="writeups"
+    tagline="Documentation"
+    title="Write-ups for the community"
+    subtitle="The topics I document so the next person does not repeat the weekend."
+    columns={2}
+    items={[
+      {
+        title: 'Travel router on a single-board computer',
+        description:
+          'A documented build of a travel router with RaspAP on an Orange Pi, including the captive-portal workflow and the Armbian quirks and their fixes.',
+        icon: 'tabler:router',
+      },
+      {
+        title: 'Raspberry Pi NVMe UAS quirk fix',
+        description: 'Notes on diagnosing and fixing the UAS quirk that affects NVMe enclosures on the Raspberry Pi.',
+        icon: 'tabler:device-sd-card',
+      },
+      {
+        title: 'macvlan Docker networking',
+        description: 'A macvlan Docker networking setup for a reverse proxy.',
+        icon: 'tabler:brand-docker',
+      },
+      {
+        title: 'Home Assistant integrations',
+        description: 'Smart-meter and dashboard integration write-ups for Home Assistant.',
+        icon: 'tabler:home-cog',
+      },
+      {
+        title: 'Static-site authentication on AWS',
+        description:
+          'Modernising authentication for a static site: replacing edge-function Basic Auth with a Cognito Hosted UI and CloudFront pattern.',
+        icon: 'tabler:lock',
+      },
+    ]}
+  />
+
+  <Content tagline="Where to find the code" title="Repositories and contributions">
+    <Fragment slot="content">
+      <p>
+        My repositories, issues and pull requests live on
+        <a class="text-primary underline" href="https://github.com/jnanadarshan" target="_blank" rel="noopener">GitHub</a>.
+        This site itself is built in the open with Astro and Tailwind. Longer write-ups are published on the
+        <a class="text-primary underline" href="/blog">blog</a>.
+      </p>
+    </Fragment>
+  </Content>
+
+  <CallToAction actions={[{ variant: 'primary', text: 'Read the blog', href: '/blog', icon: 'tabler:article' }]}>
+    <Fragment slot="title">Found a bug or have an idea?</Fragment>
+    <Fragment slot="subtitle">Open an issue on GitHub, or send me a note through the contact page.</Fragment>
+  </CallToAction>
+</Layout>

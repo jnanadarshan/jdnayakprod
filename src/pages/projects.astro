@@ -1,0 +1,134 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Features from '~/components/widgets/Features.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import Content from '~/components/widgets/Content.astro';
+
+const metadata = {
+  title: 'Projects',
+  description:
+    'Selected personal projects by JD Nayak: a semiconductor process education platform, an MES training simulator, chip packaging simulators, a DUV lithography simulator, market intelligence dashboards and agent architectures.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText
+    tagline="Proof of work"
+    title="Projects"
+    subtitle="I build to understand. These are independent, personal projects. They are not employer or client work."
+  />
+
+  <Features
+    id="semiconductor"
+    tagline="Semiconductor"
+    title="Education, simulation and intelligence"
+    columns={2}
+    items={[
+      {
+        title: 'Semiconductor Process Education Platform',
+        description:
+          'AI-powered semiconductor education platform with 3D process simulations. Built with Three.js in the browser.',
+        icon: 'tabler:stack-3',
+      },
+      {
+        title: 'MES Training Simulator',
+        description: 'An MES training simulator for new fab engineers. Built in HTML and JavaScript.',
+        icon: 'tabler:device-desktop-analytics',
+      },
+      {
+        title: 'Chip Packaging Simulator suite',
+        description: 'Eight interactive 3D explorers for package formats, built with Three.js.',
+        icon: 'tabler:cpu-2',
+      },
+      {
+        title: 'DUV Lithography Simulator',
+        description: 'A virtual equipment simulator with a SEMI E10 state machine. Built with Go and Node.js.',
+        icon: 'tabler:sun-high',
+      },
+      {
+        title: 'WFE Market Intelligence Hub',
+        description: 'A multi-vendor equipment market dashboard with export. Built with Chart.js.',
+        icon: 'tabler:chart-bar',
+      },
+      {
+        title: 'Competitive Intelligence Platform',
+        description:
+          'A filing extraction and vendor monitoring specification. Go, Python, Next.js and pgvector.',
+        icon: 'tabler:file-search',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Interactive 3D"
+    title="Explaining packages and process steps"
+    image={{ src: '~/assets/images/chip-package.svg', alt: 'Cross-section of an advanced package' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>The simulators render package formats and process steps in the browser, so new engineers can rotate, zoom and inspect structures such as TSVs, micro-bumps and solder balls.</p>
+    </Fragment>
+  </Content>
+
+  <Features3
+    id="ai-builder"
+    tagline="AI and platforms"
+    title="Agents, tools and applications"
+    columns={3}
+    items={[
+      {
+        title: 'Agent marketplace architecture',
+        description:
+          'A registry and composition model for reusable agents with MCP tools. Node.js, Docker and LangGraph.',
+        icon: 'tabler:building-store',
+      },
+      {
+        title: 'Dynamic pricing and revenue tool',
+        description: 'An in-house revenue management application, currently at specification stage.',
+        icon: 'tabler:currency-dollar',
+      },
+      {
+        title: 'Trading insights platform',
+        description:
+          'A personal equity and F&O analytics app, currently in planning. Go, Python ML, React and Postgres.',
+        icon: 'tabler:trending-up',
+      },
+    ]}
+  />
+
+  <Features3
+    id="home"
+    tagline="Home and web"
+    title="Automation and the web"
+    columns={2}
+    items={[
+      {
+        title: 'Home Assistant integrations',
+        description:
+          'Custom integrations and dashboards, including an animated, weather-aware dashboard background built from layered SVG.',
+        icon: 'tabler:home-cog',
+      },
+      {
+        title: 'Personal website and web tools',
+        description: 'This site, built with Astro and Tailwind, plus a suite of small static utilities.',
+        icon: 'tabler:world-www',
+      },
+    ]}
+  />
+
+  <Content tagline="Toolbox" title="What I build with">
+    <Fragment slot="content">
+      <ul class="space-y-3">
+        <li><strong>Languages:</strong> Go, Python, JavaScript/TypeScript, Bash, OpenSCAD</li>
+        <li><strong>Front end:</strong> React, Next.js, Astro, Tailwind CSS, Three.js, Chart.js, D3.js, static HTML tools</li>
+        <li><strong>Back end and data:</strong> Node.js, PostgreSQL, pgvector, Kafka, Flink, TimescaleDB</li>
+        <li>
+          <strong>AI engineering:</strong> LangGraph, LangChain, LangSmith, MCP servers and tools, Genkit-based multi-provider
+          apps, MLflow, vector databases, local LLM hosting with Ollama
+        </li>
+        <li><strong>Platform and ops:</strong> Docker, Linux, Proxmox, Cloudflare, AWS (S3, CloudFront, Cognito), Tailscale</li>
+      </ul>
+    </Fragment>
+  </Content>
+</Layout>

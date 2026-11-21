@@ -1,7 +1,7 @@
 {
-  "name": "@onwidget/astrowind",
+  "name": "jdnayak-site",
   "version": "1.0.0-beta.48",
-  "description": "AstroWind: A free template using Astro 4.0 and Tailwind CSS. Astro starter theme.",
+  "description": "Personal website of JD Nayak: agentic AI for semiconductor manufacturing, software, homelab and DIY.",
   "type": "module",
   "private": true,
   "engines": {

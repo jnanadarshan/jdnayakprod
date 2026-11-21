@@ -1,0 +1,115 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Features from '~/components/widgets/Features.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import Content from '~/components/widgets/Content.astro';
+
+const metadata = {
+  title: 'Homelab',
+  description:
+    'A self-hosted homelab run like a small production environment: Proxmox, TrueNAS, OPNsense, OpenWrt, Wazuh, Home Assistant and travel-router projects.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="Homelab" title="A small production environment I am allowed to break">
+    <Fragment slot="subtitle">
+      It is where I test infrastructure ideas, security tooling and automation before I trust them anywhere that
+      matters. It also keeps my data in my own hands. This page describes the concepts only, never addresses or
+      configuration.
+    </Fragment>
+  </HeroText>
+
+  <Content
+    tagline="Concept view"
+    title="Zones, not addresses"
+    image={{ src: '~/assets/images/homelab.svg', alt: 'Homelab rack and segmented network zones' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>Trusted, server, IoT and quarantine zones sit behind a firewall, with storage, virtualisation and home automation each in their place. Shown here at concept level only.</p>
+    </Fragment>
+  </Content>
+
+  <Features
+    id="stack"
+    tagline="What it covers"
+    title="Compute, storage, network, services"
+    columns={2}
+    items={[
+      {
+        title: 'Compute and virtualisation',
+        description:
+          'A Proxmox host running virtual machines and containers, and a mix of Raspberry Pi and Orange Pi boards for dedicated low-power services. A dedicated local LLM host (Ollama, Ryzen-class CPU, 32 GB RAM) serves small models as an additional provider to multi-model apps.',
+        icon: 'tabler:server',
+      },
+      {
+        title: 'Storage and backup',
+        description:
+          'A TrueNAS server is the central store. Snapshot-style backups use rsync with hardlinks to NFS, chosen deliberately for simplicity over heavier tooling.',
+        icon: 'tabler:database',
+      },
+      {
+        title: 'Network and security',
+        description:
+          'A segmented network (trusted, servers, IoT and quarantine zones) built around OPNsense. Intrusion detection and SIEM-style visibility with Suricata, Wazuh, CrowdSec and Grafana. OpenWrt on multiple access points, with an ongoing Wi-Fi overhaul adding Wi-Fi 6 coverage and isolating IoT and guest devices on firewalled VLANs. Tailscale is the secure remote-access and recovery path.',
+        icon: 'tabler:shield-lock',
+      },
+      {
+        title: 'Self-hosted services',
+        description:
+          'Personal cloud storage and file sync, a password vault, a wiki, a smart-home hub and file transfer services, all running in containers across the Pis and NAS.',
+        icon: 'tabler:apps',
+      },
+      {
+        title: 'Smart home and automation',
+        description:
+          'Home Assistant on a Raspberry Pi 5. ESPHome devices, plus Tuya and TP-Link ecosystems brought under local control. Custom integrations, including a reverse-engineered utility portal integration for energy data, and animated weather-aware dashboard themes built from layered SVG.',
+        icon: 'tabler:home-cog',
+      },
+      {
+        title: 'Real-world troubleshooting',
+        description:
+          'Diagnosing and fixing real network and storage problems, such as tracing a recurring hang back to the storage I/O layer rather than the NIC.',
+        icon: 'tabler:bug',
+      },
+    ]}
+  />
+
+  <Features3
+    id="travel"
+    tagline="Travel and connectivity"
+    title="Projects that leave the house"
+    columns={3}
+    items={[
+      {
+        title: 'GigaTravel',
+        description:
+          'A pocket travel router on an Orange Pi Zero 3, with a captive-portal login workflow for hotel networks and an out-of-band recovery path.',
+        icon: 'tabler:wifi',
+      },
+      {
+        title: 'In-flight media server',
+        description: 'A concept using yt-dlp and podcast tooling on a spare board.',
+        icon: 'tabler:plane',
+      },
+      {
+        title: 'Home telephony',
+        description: 'Home telephony on a fibre ONT with a SIP voice profile.',
+        icon: 'tabler:phone',
+      },
+    ]}
+  />
+
+  <Content tagline="Principles" title="Four rules I follow">
+    <Fragment slot="content">
+      <ul class="list-disc pl-5 space-y-2">
+        <li><strong>Segment everything.</strong> IoT does not belong next to your laptop.</li>
+        <li><strong>Backups you can restore beat backups you can brag about.</strong></li>
+        <li><strong>Local first, cloud when it earns it.</strong></li>
+        <li><strong>Write it down.</strong> Every fix goes into a doc, ideally one that ends up on GitHub.</li>
+      </ul>
+    </Fragment>
+  </Content>
+</Layout>

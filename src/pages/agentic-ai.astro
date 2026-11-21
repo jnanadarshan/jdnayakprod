@@ -1,0 +1,190 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features from '~/components/widgets/Features.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import Steps from '~/components/widgets/Steps.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Agentic AI',
+  description:
+    'The proliferation thesis: agentic AI will not stay a pilot. Core beliefs, the five stages of agent proliferation and the hard problems of trust, guardrails and integration.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="Point of view">
+    <Fragment slot="title">
+      Agentic AI will not stay a pilot. <span class="text-accent dark:text-white highlight">It will proliferate.</span>
+    </Fragment>
+    <Fragment slot="subtitle">
+      The people who make it governable will determine how well that goes. This is the connective tissue between
+      everything else on this site.
+    </Fragment>
+  </HeroText>
+
+  <Features
+    id="beliefs"
+    tagline="Core beliefs"
+    title="Seven things I hold to"
+    columns={2}
+    items={[
+      {
+        title: '1. From copilots to coworkers',
+        description: 'Assistive chat is the on-ramp. Real value arrives when agents own bounded tasks end to end.',
+        icon: 'tabler:users',
+      },
+      {
+        title: '2. Domain grounding beats model size',
+        description: 'An agent with a good knowledge model of the process outperforms a bigger model with none.',
+        icon: 'tabler:target',
+      },
+      {
+        title: '3. Autonomy is earned, not declared',
+        description:
+          'Every agent should start in advise mode and graduate through explicit evidence, thresholds and approvals.',
+        icon: 'tabler:award',
+      },
+      {
+        title: '4. Humans move up the stack',
+        description:
+          'Engineers shift from operating to supervising, from chasing alarms to setting policy and reviewing exceptions.',
+        icon: 'tabler:stairs-up',
+      },
+      {
+        title: '5. Agents need infrastructure, not just prompts',
+        description:
+          'Shared knowledge, tool access, orchestration, observability, evaluation and audit are the real product.',
+        icon: 'tabler:building-bridge-2',
+      },
+      {
+        title: '6. Reuse is the multiplier',
+        description: 'One well-governed agent pattern deployed across ten use cases beats ten bespoke builds.',
+        icon: 'tabler:recycle',
+      },
+      {
+        title: '7. Open standards matter',
+        description: 'MCP, open ontologies and SEMI standards keep agent ecosystems interoperable and avoid lock-in.',
+        icon: 'tabler:lock-open',
+      },
+    ]}
+  />
+
+  <Steps
+    id="stages"
+    image={{ src: '~/assets/images/proliferation-stages.svg', alt: 'Five stages of agent proliferation' }}
+    tagline="Proliferation"
+    title="What proliferation looks like in practice"
+    items={[
+      {
+        title: '1. Pilot',
+        description: 'A single agent on a single use case, advise-only.',
+        icon: 'tabler:flask',
+      },
+      {
+        title: '2. Pattern',
+        description:
+          'A reusable architecture (knowledge model, orchestration, HITL) proven across two or three use cases.',
+        icon: 'tabler:components',
+      },
+      {
+        title: '3. Platform',
+        description: 'A shared agent registry, tool access through MCP, and common evaluation and observability.',
+        icon: 'tabler:layers-intersect',
+      },
+      {
+        title: '4. Fabric',
+        description:
+          'Agents cooperate across process, equipment, MES and supply chain, with policy-driven autonomy.',
+        icon: 'tabler:network',
+      },
+      {
+        title: '5. Autonomous operations',
+        description:
+          'Supervised "lights-out" regions of the factory, with humans managing exceptions and strategy.',
+        icon: 'tabler:lighter',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Earning autonomy"
+    title="Four stages, each with its own evidence"
+    image={{ src: '~/assets/images/autonomy-stages.svg', alt: 'Four-stage staircase of progressive autonomy' }}
+    isReversed={false}
+  >
+    <Fragment slot="content">
+      <p>Advise, recommend with approval, act within bounds, act and report. An agent moves up only when metrics, thresholds and sign-off say it has earned the next stage.</p>
+    </Fragment>
+  </Content>
+
+  <Features3
+    id="hard-problems"
+    tagline="Hard problems"
+    title="The problems I care about most"
+    columns={3}
+    items={[
+      {
+        title: 'Trust and evaluation',
+        description:
+          'How to measure whether an agent is right, safe and improving, before and after deployment.',
+        icon: 'tabler:scale',
+      },
+      {
+        title: 'Guardrails in high-value environments',
+        description: 'Where a wrong action can scrap wafers or stop a line.',
+        icon: 'tabler:shield-lock',
+      },
+      {
+        title: 'Knowledge capture',
+        description: 'Getting tribal expertise into machine-usable form without freezing it.',
+        icon: 'tabler:brain',
+      },
+      {
+        title: 'Integration debt',
+        description:
+          'Connecting agents to legacy MES, equipment interfaces and data silos through standards.',
+        icon: 'tabler:plug-connected',
+      },
+      {
+        title: 'Change management',
+        description: 'Earning engineer trust and designing roles for a supervised-autonomy workplace.',
+        icon: 'tabler:users-group',
+      },
+      {
+        title: 'Local and private models',
+        description: 'Running capable smaller models on-premises where data cannot leave the fab.',
+        icon: 'tabler:server-2',
+      },
+    ]}
+  />
+
+  <Content
+    tagline="Knowledge first"
+    title="Teach the agent the process"
+    image={{ src: '~/assets/images/knowledge-graph.svg', alt: 'Knowledge graph linking process, equipment, chamber, recipe and limits' }}
+    isReversed={true}
+  >
+    <Fragment slot="content">
+      <p>Agents reason over a structured model of processes, equipment, parameters and limits, rather than guessing from text alone.</p>
+    </Fragment>
+  </Content>
+
+  <Content tagline="Beyond the fab" title="The same patterns, applied elsewhere">
+    <Fragment slot="content">
+      <p>
+        The same patterns apply to engineering teams, revenue operations, infrastructure and personal productivity. That
+        is why I also build and test multi-provider agent applications in my own time, across Gemini, Anthropic, OpenAI,
+        DeepSeek, AWS Bedrock, Azure and local Ollama models. For the fab-specific application of these ideas, see
+        <a class="text-primary underline" href="/ai-semiconductor">AI × Semiconductor</a>.
+      </p>
+    </Fragment>
+  </Content>
+
+  <CallToAction actions={[{ variant: 'primary', text: 'Start a conversation', href: '/contact', icon: 'tabler:mail' }]}>
+    <Fragment slot="title">Thinking about agent governance?</Fragment>
+    <Fragment slot="subtitle">I am always glad to compare notes on evaluation, guardrails and staged autonomy.</Fragment>
+  </CallToAction>
+</Layout>

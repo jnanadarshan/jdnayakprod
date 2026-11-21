@@ -1,228 +1,108 @@
 ---
-import Features2 from '~/components/widgets/Features2.astro';
-import Features3 from '~/components/widgets/Features3.astro';
-import Hero from '~/components/widgets/Hero.astro';
-import Stats from '~/components/widgets/Stats.astro';
-import Steps2 from '~/components/widgets/Steps2.astro';
 import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'About us',
+  title: 'About',
+  description:
+    'Jnanadarshan (JD) Nayak heads Semiconductor Strategy & the Semiconductor Manufacturing Practice at TCS, based in Bhubaneswar, India, working on agentic AI for fab operations.',
 };
 ---
 
 <Layout metadata={metadata}>
-  <!-- Hero Widget ******************* -->
+  <HeroText tagline="About" title="Jnanadarshan Nayak" subtitle="Goes by JD Nayak. Based in Bhubaneswar, Odisha, India." />
 
-  <Hero
-    tagline="About us"
-    image={{
-      src: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Caos Image',
-    }}
-  >
-    <Fragment slot="title">
-      Elevate your online presence with our <br />
-      <span class="text-accent dark:text-white highlight"> Beautiful Website Templates</span>
+  <Content
+    image={{ src: '~/assets/images/wafer-hero.svg', alt: 'A silicon wafer with a grid of dies' }}
+    isReversed={false}
+    tagline="Bio" title="Where semiconductor manufacturing meets modern AI">
+    <Fragment slot="content">
+      <p class="mb-4">
+        Jnanadarshan (JD) Nayak works at the point where semiconductor manufacturing meets modern AI. He heads
+        Semiconductor Strategy &amp; the Semiconductor Manufacturing Practice at Tata Consultancy Services, and has
+        been with TCS in the Hi-Tech domain since August 2017. He advises semiconductor and electronics manufacturers
+        on AI adoption, fab automation, MES/MOM modernisation, IT/OT convergence and competitive strategy, working
+        primarily with companies in the US and Europe, and increasingly across Asia Pacific.
+      </p>
+      <p class="mb-4">
+        His conviction is simple: the next productivity step in manufacturing will not come from more dashboards. It
+        will come from systems that perceive, reason and act inside the production environment, with engineers
+        supervising rather than operating. He designs those systems end to end: the domain knowledge layer, the agent
+        orchestration, the human-in-the-loop controls, the standards-compliant integration, and the phased path to
+        autonomy.
+      </p>
+      <p>
+        He is equally a builder. He writes software in Go, Python and Node.js, creates interactive 3D and browser-based
+        learning tools for semiconductor processes, contributes to and publishes open source, and runs a self-hosted
+        homelab covering storage, virtualisation, network security and home automation. When something physical is
+        needed, he designs it in OpenSCAD and prints it.
+      </p>
     </Fragment>
-
-    <Fragment slot="subtitle">
-      Donec efficitur, ipsum quis congue luctus, mauris magna convallis mauris, eu auctor nisi lectus non augue. Donec
-      quis lorem non massa vulputate efficitur ac at turpis. Sed tincidunt ex a nunc convallis, et lobortis nisi tempus.
-      Suspendisse vitae nisi eget tortor luctus maximus sed non lectus.
-    </Fragment>
-  </Hero>
-
-  <!-- Stats Widget ****************** -->
-
-  <Stats
-    title="Statistics about us"
-    stats={[
-      { title: 'Offices', amount: '4' },
-      { title: 'Employees', amount: '248' },
-      { title: 'Templates', amount: '12' },
-      { title: 'Awards', amount: '24' },
-    ]}
-  />
-
-  <!-- Features3 Widget ************** -->
+  </Content>
 
   <Features3
-    title="Our templates"
-    subtitle="Etiam scelerisque, enim eget vestibulum luctus, nibh mauris blandit nulla, nec vestibulum risus justo ut enim. Praesent lacinia diam et ante imperdiet euismod."
+    tagline="What I do"
+    title="Five pillars"
     columns={3}
-    isBeforeContent={true}
     items={[
       {
-        title: 'Educational',
+        title: 'AI × Semiconductor',
         description:
-          'Morbi faucibus luctus quam, sit amet aliquet felis tempor id. Cras augue massa, ornare quis dignissim a, molestie vel nulla.',
-        icon: 'tabler:template',
+          'Designing and delivering AI and agentic systems for fab operations, grounded in real process and equipment knowledge.',
+        icon: 'tabler:cpu',
       },
       {
-        title: 'Interior Design',
+        title: 'Agentic AI at scale',
         description:
-          'Vivamus porttitor, tortor convallis aliquam pretium, turpis enim consectetur elit, vitae egestas purus erat ac nunc nulla.',
-        icon: 'tabler:template',
+          'Making agent systems trustworthy, governable and repeatable enough to proliferate across a factory and an enterprise.',
+        icon: 'tabler:robot',
       },
       {
-        title: 'Photography',
+        title: 'Software and open source',
+        description: 'Building tools, simulators and platforms, and sharing what works.',
+        icon: 'tabler:code',
+      },
+      {
+        title: 'Homelab',
         description:
-          'Duis sed lectus in nisl vehicula porttitor eget quis odio. Aliquam erat volutpat. Nulla eleifend nulla id sem fermentum.',
-        icon: 'tabler:template',
+          'Self-hosted infrastructure, network security and automation, run like a small production environment.',
+        icon: 'tabler:server',
+      },
+      {
+        title: 'DIY and making',
+        description: 'Parametric design, 3D printing, embedded devices and hardware hacking.',
+        icon: 'tabler:tool',
       },
     ]}
   />
 
-  <!-- Features3 Widget ************** -->
+  <Content isReversed={true} tagline="How I work" title="Practitioner first">
+    <Fragment slot="content">
+      <ul class="list-disc pl-5 space-y-2">
+        <li>I lead with what was built and what it solved.</li>
+        <li>I name the standards, tools and methods instead of waving at them.</li>
+        <li>I have calm confidence on AI: no hype, but clear conviction on direction.</li>
+        <li>I build to understand. Most of what I advise on, I have first prototyped myself.</li>
+        <li>Every fix gets written down, ideally somewhere other people can find it.</li>
+      </ul>
+    </Fragment>
+  </Content>
 
-  <Features3
-    columns={3}
-    isAfterContent={true}
-    items={[
-      {
-        title: 'E-commerce',
-        description:
-          'Rutrum non odio at vehicula. Proin ipsum justo, dignissim in vehicula sit amet, dignissim id quam. Sed ac tincidunt sapien.',
-        icon: 'tabler:template',
-      },
-      {
-        title: 'Blog',
-        description:
-          'Nullam efficitur volutpat sem sed fringilla. Suspendisse et enim eu orci volutpat laoreet ac vitae libero.',
-        icon: 'tabler:template',
-      },
-      {
-        title: 'Business',
-        description:
-          'Morbi et elit finibus, facilisis justo ut, pharetra ipsum. Donec efficitur, ipsum quis congue luctus, mauris magna.',
-        icon: 'tabler:template',
-      },
-      {
-        title: 'Branding',
-        description:
-          'Suspendisse vitae nisi eget tortor luctus maximus sed non lectus. Cras malesuada pretium placerat. Nullam venenatis dolor a ante rhoncus.',
-        icon: 'tabler:template',
-      },
-      {
-        title: 'Medical',
-        description:
-          'Vestibulum malesuada lacus id nibh posuere feugiat. Nam volutpat nulla a felis ultrices, id suscipit mauris congue. In hac habitasse platea dictumst.',
-        icon: 'tabler:template',
-      },
-      {
-        title: 'Fashion Design',
-        description:
-          'Maecenas eu tellus eget est scelerisque lacinia et a diam. Aliquam velit lorem, vehicula id fermentum et, rhoncus et purus.',
-        icon: 'tabler:template',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      alt: 'Colorful Image',
-    }}
-  />
+  <Content tagline="Independent work" title="Personal projects are personal">
+    <Fragment slot="content">
+      <p>
+        The projects, simulators, homelab notes and opinions on this site are my own. They are independent of my
+        employer and its clients, and nothing here describes client engagements, proprietary designs or internal
+        systems. Views expressed here are my own and do not represent those of my employer or its clients.
+      </p>
+    </Fragment>
+  </Content>
 
-  <!-- Steps2 Widget ****************** -->
-
-  <Steps2
-    title="Our values"
-    subtitle="Maecenas eu tellus eget est scelerisque lacinia et a diam. Aliquam velit lorem, vehicula id fermentum et, rhoncus et purus. Nulla facilisi. Vestibulum malesuada lacus."
-    items={[
-      {
-        title: 'Customer-centric approach',
-        description:
-          'Donec id nibh neque. Quisque et fermentum tortor. Fusce vitae dolor a mauris dignissim commodo. Ut eleifend luctus condimentum.',
-      },
-      {
-        title: 'Constant Improvement',
-        description:
-          'Phasellus laoreet fermentum venenatis. Vivamus dapibus pulvinar arcu eget mattis. Fusce eget mauris leo.',
-      },
-      {
-        title: 'Ethical Practices',
-        description:
-          'Vestibulum imperdiet libero et lectus molestie, et maximus augue porta. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.',
-      },
-    ]}
-  />
-
-  <!-- Steps2 Widget ****************** -->
-
-  <Steps2
-    title="Achievements"
-    subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sagittis, quam nec venenatis lobortis, mi risus tempus nulla, sed porttitor est nibh at nulla."
-    isReversed={true}
-    callToAction={{
-      text: 'See more',
-      href: '/',
-    }}
-    items={[
-      {
-        title: 'Global reach',
-        description: 'Nam malesuada urna in enim imperdiet tincidunt. Phasellus non tincidunt nisi, at elementum mi.',
-        icon: 'tabler:globe',
-      },
-      {
-        title: 'Positive customer feedback and reviews',
-        description:
-          'Cras semper nulla leo, eget laoreet erat cursus sed. Praesent faucibus massa in purus iaculis dictum.',
-        icon: 'tabler:message-star',
-      },
-      {
-        title: 'Awards and recognition as industry experts',
-        description:
-          'Phasellus lacinia cursus velit, eu malesuada magna pretium eu. Etiam aliquet tellus purus, blandit lobortis ex rhoncus vitae.',
-        icon: 'tabler:award',
-      },
-    ]}
-  />
-
-  <!-- Features2 Widget ************** -->
-
-  <Features2
-    title="Our locations"
-    tagline="Find us"
-    columns={4}
-    items={[
-      {
-        title: 'EE.UU',
-        description: '1234 Lorem Ipsum St, 12345, Miami',
-      },
-      {
-        title: 'Spain',
-        description: '5678 Lorem Ipsum St, 56789, Madrid',
-      },
-      {
-        title: 'Australia',
-        description: '9012 Lorem Ipsum St, 90123, Sydney',
-      },
-      {
-        title: 'Brazil',
-        description: '3456 Lorem Ipsum St, 34567, São Paulo',
-      },
-    ]}
-  />
-
-  <!-- Features2 Widget ************** -->
-
-  <Features2
-    title="Technical Support"
-    tagline="Contact us"
-    columns={2}
-    items={[
-      {
-        title: 'Chat with us',
-        description:
-          'Integer luctus laoreet libero, auctor varius purus rutrum sit amet. Ut nec molestie nisi, quis eleifend mi.',
-        icon: 'tabler:messages',
-      },
-      {
-        title: 'Call us',
-        description:
-          'Mauris faucibus finibus orci, in posuere elit viverra non. In hac habitasse platea dictumst. Cras lobortis metus a hendrerit congue.',
-        icon: 'tabler:headset',
-      },
-    ]}
-  />
+  <CallToAction actions={[{ variant: 'primary', text: 'Contact me', href: '/contact', icon: 'tabler:mail' }]}>
+    <Fragment slot="title">Let's talk</Fragment>
+    <Fragment slot="subtitle">Fab automation, agentic AI architecture, MES modernisation or open source tooling.</Fragment>
+  </CallToAction>
 </Layout>

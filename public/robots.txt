@@ -1,2 +1,6 @@
 User-agent: *
 Disallow:
+
+# LLMs and AI agents: a structured profile of Jnanadarshan Nayak is at https://jdnayak.com/llms.txt
+
+Sitemap: https://jdnayak.com/sitemap-index.xml
