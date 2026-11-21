@@ -1,4 +1,5 @@
 ---
+import { themedImage } from '~/utils/themed-image';
 import Layout from '~/layouts/PageLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import Content from '~/components/widgets/Content.astro';
@@ -16,7 +17,7 @@ const metadata = {
   <HeroText tagline="About" title="Jnanadarshan Nayak" subtitle="Goes by JD Nayak. Based in Bhubaneswar, Odisha, India." />
 
   <Content
-    image={{ src: '~/assets/images/wafer-hero.svg', alt: 'A silicon wafer with a grid of dies' }}
+    image={themedImage('wafer-hero', 'A silicon wafer with a grid of dies')}
     isReversed={false}
     tagline="Bio" title="Where semiconductor manufacturing meets modern AI">
     <Fragment slot="content">

@@ -1,4 +1,5 @@
 ---
+import { themedImage } from '~/utils/themed-image';
 import Layout from '~/layouts/PageLayout.astro';
 
 import Hero from '~/components/widgets/Hero.astro';
@@ -87,7 +88,7 @@ const metadata = {
   />
 
   <Steps
-    image={{ src: '~/assets/images/autonomy-stages.svg', alt: 'Four-stage staircase of progressive autonomy' }}
+    image={themedImage('autonomy-stages', 'Four-stage staircase of progressive autonomy')}
     title="How agentic AI reaches the factory floor"
     subtitle="Autonomy is staged. Each step has its own evidence, thresholds and approvals before the next one begins."
     items={[

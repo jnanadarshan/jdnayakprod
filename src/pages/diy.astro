@@ -1,4 +1,5 @@
 ---
+import { themedImage } from '~/utils/themed-image';
 import Layout from '~/layouts/PageLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import Content from '~/components/widgets/Content.astro';
@@ -22,7 +23,7 @@ const metadata = {
   <Content
     tagline="From model to object"
     title="Parameters instead of fixed dimensions"
-    image={{ src: '~/assets/images/diy.svg', alt: '3D printer printing a parametric swivel mount' }}
+    image={themedImage('diy', '3D printer printing a parametric swivel mount')}
     isReversed={false}
   >
     <Fragment slot="content">

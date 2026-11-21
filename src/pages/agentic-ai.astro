@@ -1,4 +1,5 @@
 ---
+import { themedImage } from '~/utils/themed-image';
 import Layout from '~/layouts/PageLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import Content from '~/components/widgets/Content.astro';
@@ -74,7 +75,7 @@ const metadata = {
 
   <Steps
     id="stages"
-    image={{ src: '~/assets/images/proliferation-stages.svg', alt: 'Five stages of agent proliferation' }}
+    image={themedImage('proliferation-stages', 'Five stages of agent proliferation')}
     tagline="Proliferation"
     title="What proliferation looks like in practice"
     items={[
@@ -112,7 +113,7 @@ const metadata = {
   <Content
     tagline="Earning autonomy"
     title="Four stages, each with its own evidence"
-    image={{ src: '~/assets/images/autonomy-stages.svg', alt: 'Four-stage staircase of progressive autonomy' }}
+    image={themedImage('autonomy-stages', 'Four-stage staircase of progressive autonomy')}
     isReversed={false}
   >
     <Fragment slot="content">
@@ -164,7 +165,7 @@ const metadata = {
   <Content
     tagline="Knowledge first"
     title="Teach the agent the process"
-    image={{ src: '~/assets/images/knowledge-graph.svg', alt: 'Knowledge graph linking process, equipment, chamber, recipe and limits' }}
+    image={themedImage('knowledge-graph', 'Knowledge graph linking process, equipment, chamber, recipe and limits')}
     isReversed={true}
   >
     <Fragment slot="content">
