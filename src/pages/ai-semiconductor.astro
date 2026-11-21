@@ -6,6 +6,7 @@ import Features from '~/components/widgets/Features.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
+import ThemedImage from '~/components/ui/ThemedImage.astro';
 
 const metadata = {
   title: 'AI × Semiconductor',
@@ -28,9 +29,8 @@ const metadata = {
     </Fragment>
   </HeroText>
 
-  <Content
-    image={{ src: '~/assets/images/fab-flow.svg', alt: 'Front-end wafer process loop' }}
-    tagline="Thesis" title="The shape of AI in the fab is changing">
+  <Content tagline="Thesis" title="The shape of AI in the fab is changing">
+    <Fragment slot="image"><ThemedImage name="fab-flow" alt="Front-end wafer process loop" /></Fragment>
     <Fragment slot="content">
       <p class="mb-4">
         Semiconductor manufacturing is the most data-rich, process-controlled and standards-driven manufacturing
@@ -89,9 +89,10 @@ const metadata = {
   <Content
     tagline="Equipment is the data source"
     title="Every chamber is a stream of signals"
-    image={{ src: '~/assets/images/etch-chamber.svg', alt: 'Cross-section of a plasma etch process chamber with sensors' }}
+
     isReversed={false}
   >
+    <Fragment slot="image"><ThemedImage name="etch-chamber" alt="Cross-section of a plasma etch process chamber with sensors" /></Fragment>
     <Fragment slot="content">
       <p>A process chamber such as a plasma etcher reports gas flows, RF power, pressure and temperature continuously. Those traces feed FDC, chamber matching and virtual metrology, which is why equipment knowledge and data engineering have to be designed together.</p>
     </Fragment>
@@ -152,9 +153,9 @@ const metadata = {
   <Content
     tagline="Measure less, know more"
     title="Virtual metrology in one picture"
-    image={{ src: '~/assets/images/wafer-metrology.svg', alt: 'Wafer map with measured and predicted sites and an uncertainty band' }}
     isReversed={true}
   >
+    <Fragment slot="image"><ThemedImage name="wafer-metrology" alt="Wafer map with measured and predicted sites and an uncertainty band" /></Fragment>
     <Fragment slot="content">
       <p>Only some wafer sites are measured. Virtual metrology predicts the rest from process data and attaches an uncertainty interval, so engineers review the low-confidence sites instead of every site.</p>
     </Fragment>
@@ -202,9 +203,9 @@ const metadata = {
   <Content
     tagline="Control layer"
     title="Knowledge, agents, gates and tools"
-    image={{ src: '~/assets/images/agent-loop.svg', alt: 'Agent architecture with knowledge model, human gate and MES tools' }}
     isReversed={false}
   >
+    <Fragment slot="image"><ThemedImage name="agent-loop" alt="Agent architecture with knowledge model, human gate and MES tools" /></Fragment>
     <Fragment slot="content">
       <p>The agent reads a versioned process knowledge model, investigates with tools exposed through MCP, and hands every consequential action to a human gate. The audit trail feeds back into the knowledge model.</p>
     </Fragment>
@@ -282,9 +283,9 @@ const metadata = {
   <Content
     tagline="Lithography"
     title="From light source to printed pattern"
-    image={{ src: '~/assets/images/litho.svg', alt: 'Simplified lithography optical path' }}
     isReversed={true}
   >
+    <Fragment slot="image"><ThemedImage name="litho" alt="Simplified lithography optical path" /></Fragment>
     <Fragment slot="content">
       <p>The simulators I build explain machines like this one: DUV light passes through a reticle and a reduction lens, and the stage steps and scans so each die is exposed in turn.</p>
     </Fragment>
@@ -336,9 +337,9 @@ const metadata = {
   <Content
     tagline="Advanced packaging"
     title="Stacked dies, TSVs and solder balls"
-    image={{ src: '~/assets/images/chip-package.svg', alt: 'Cross-section of an advanced package with stacked memory and TSVs' }}
     isReversed={false}
   >
+    <Fragment slot="image"><ThemedImage name="chip-package" alt="Cross-section of an advanced package with stacked memory and TSVs" /></Fragment>
     <Fragment slot="content">
       <p>Packaging is now a process-control problem in its own right: thinning, micro-bumping, bonding and underfill all generate data that agents can use.</p>
     </Fragment>

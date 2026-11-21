@@ -4,6 +4,7 @@ import HeroText from '~/components/widgets/HeroText.astro';
 import Features from '~/components/widgets/Features.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import Content from '~/components/widgets/Content.astro';
+import ThemedImage from '~/components/ui/ThemedImage.astro';
 
 const metadata = {
   title: 'Projects',
@@ -63,9 +64,9 @@ const metadata = {
   <Content
     tagline="Interactive 3D"
     title="Explaining packages and process steps"
-    image={{ src: '~/assets/images/chip-package.svg', alt: 'Cross-section of an advanced package' }}
     isReversed={false}
   >
+    <Fragment slot="image"><ThemedImage name="chip-package" alt="Cross-section of an advanced package" /></Fragment>
     <Fragment slot="content">
       <p>The simulators render package formats and process steps in the browser, so new engineers can rotate, zoom and inspect structures such as TSVs, micro-bumps and solder balls.</p>
     </Fragment>

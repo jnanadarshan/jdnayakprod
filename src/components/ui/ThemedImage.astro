@@ -1,0 +1,35 @@
+---
+import type { ImageMetadata } from 'astro';
+// Renders a light and a dark variant of an illustration, switched by the site's theme class.
+export interface Props {
+  name: string;
+  alt: string;
+}
+const { name, alt } = Astro.props;
+const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/*.svg', { eager: true });
+const light = files[`/src/assets/images/${name}-light.svg`]?.default;
+const dark = files[`/src/assets/images/${name}-dark.svg`]?.default;
+---
+
+{
+  light && dark && (
+    <>
+      <img
+        src={light.src}
+        width={light.width}
+        height={light.height}
+        alt={alt}
+        class="mx-auto w-full h-auto dark:hidden"
+        loading="lazy"
+      />
+      <img
+        src={dark.src}
+        width={dark.width}
+        height={dark.height}
+        alt={alt}
+        class="mx-auto w-full h-auto hidden dark:block"
+        loading="lazy"
+      />
+    </>
+  )
+}
