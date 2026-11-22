@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+
+export async function getStaticPaths() {
+  const demos = await getCollection('demos', ({ data }) => !data.draft);
+  return demos.map((demo) => ({ params: { slug: demo.slug }, props: { demo } }));
+}
+
+const { demo } = Astro.props;
+const { Content } = await demo.render();
+const { title, summary, embedUrl, demoUrl, repo, tags } = demo.data;
+const metadata = { title, description: summary };
+---
+
+<Layout metadata={metadata}>
+  <section class="mx-auto max-w-4xl px-4 sm:px-6 py-12">
+    <p class="text-sm text-muted"><a href="/demos" class="underline">← All demos</a></p>
+    <h1 class="text-4xl font-bold font-heading mt-2">{title}</h1>
+    <p class="mt-3 text-lg">{summary}</p>
+    {tags && <p class="mt-2 text-sm text-muted">{tags.join(' · ')}</p>}
+
+    {
+      embedUrl && (
+        <iframe src={embedUrl} title={title} class="w-full h-[600px] rounded border mt-8" loading="lazy" />
+      )
+    }
+    <div class="mt-6 flex gap-4">
+      {demoUrl && <a href={demoUrl} class="btn-primary underline">Open demo</a>}
+      {repo && <a href={repo} class="underline">Source</a>}
+    </div>
+
+    <div class="prose dark:prose-invert max-w-none mt-8"><Content /></div>
+  </section>
+</Layout>

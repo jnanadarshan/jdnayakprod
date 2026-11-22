@@ -5,6 +5,7 @@ export const headerData = {
     { text: 'AI × Semiconductor', href: getPermalink('/ai-semiconductor') },
     { text: 'Agentic AI', href: getPermalink('/agentic-ai') },
     { text: 'Projects', href: getPermalink('/projects') },
+    { text: 'Demos', href: getPermalink('/demos') },
     {
       text: 'Beyond Work',
       links: [
@@ -27,6 +28,7 @@ export const footerData = {
         { text: 'AI × Semiconductor', href: getPermalink('/ai-semiconductor') },
         { text: 'Agentic AI', href: getPermalink('/agentic-ai') },
         { text: 'Projects', href: getPermalink('/projects') },
+        { text: 'Demos', href: getPermalink('/demos') },
       ],
     },
     {

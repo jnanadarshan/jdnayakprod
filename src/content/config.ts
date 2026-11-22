@@ -63,6 +63,23 @@ const postCollection = defineCollection({
   }),
 });
 
+const demosCollection = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    type: z.enum(['mes', '3d', 'other']).default('other'),
+    status: z.enum(['live', 'prototype', 'planned']).default('prototype'),
+    order: z.number().default(100),
+    draft: z.boolean().optional(),
+    image: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    demoUrl: z.string().url().optional(),
+    embedUrl: z.string().url().optional(),
+    repo: z.string().url().optional(),
+  }),
+});
+
 export const collections = {
   post: postCollection,
+  demos: demosCollection,
 };
