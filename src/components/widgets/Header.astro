@@ -154,7 +154,17 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
           actions?.length ? (
             <span class="ml-4 rtl:ml-0 rtl:mr-4">
               {actions.map((btnProps) => (
-                <Button {...btnProps} class="ml-2 py-2.5 px-5.5 md:px-6 font-semibold shadow-none text-sm w-auto" />
+                <>
+                  <Button {...btnProps} class="hdr-action-btn ml-2 py-2.5 px-5.5 md:px-6 font-semibold shadow-none text-sm w-auto" />
+                  <a
+                    class="hdr-action-icon text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2.5 items-center"
+                    aria-label={btnProps.text}
+                    title={btnProps.text}
+                    href={btnProps.href}
+                  >
+                    <Icon name="tabler:mail" class="w-5 h-5" />
+                  </a>
+                </>
               ))}
             </span>
           ) : (

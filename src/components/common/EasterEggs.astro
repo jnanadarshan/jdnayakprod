@@ -1,0 +1,425 @@
+---
+// Hidden surprises. Type a word anywhere on the page (not inside a form field):
+//   chip, wafer, moore, etch, litho, yield, bug, fab, nano, sand
+// Also: Konami code, clicking the top-left then top-right corner, and a console message.
+// Chippy, a walking IC mascot, hands out hints: type "chippy", or he shows up
+// on his own after 90 seconds on the site (once per browser session).
+---
+
+<script is:inline>
+  (function () {
+    if (window.__jdEasterEggs) return; // view transitions may re-run inline scripts
+    window.__jdEasterEggs = true;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var layer;
+    function ensureLayer() {
+      if (layer && document.body.contains(layer)) return layer;
+      layer = document.createElement('div');
+      layer.setAttribute('aria-hidden', 'true');
+      layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483000;overflow:hidden';
+      document.body.appendChild(layer);
+      return layer;
+    }
+    var styleEl = document.createElement('style');
+    styleEl.textContent =
+      '@keyframes ee-fall{to{transform:translateY(110vh) rotate(var(--r))}}' +
+      '@keyframes ee-spin{to{transform:rotate(360deg)}}' +
+      '@keyframes ee-pop{0%{opacity:0;transform:translate(-50%,10px)}12%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}' +
+      '@keyframes ee-trace{to{stroke-dashoffset:0}}' +
+      '@keyframes ee-fade{0%{opacity:0}15%,80%{opacity:1}100%{opacity:0}}' +
+      '@keyframes ee-scurry{from{transform:translateX(-60px)}to{transform:translateX(110vw)}}';
+    document.head.appendChild(styleEl);
+
+    function toast(msg) {
+      var t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText =
+        'position:fixed;left:50%;bottom:32px;transform:translateX(-50%);max-width:90vw;padding:10px 18px;border-radius:9999px;' +
+        'background:rgba(15,23,42,.92);color:#e2e8f0;font:500 14px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;' +
+        'box-shadow:0 8px 30px rgba(0,0,0,.35);z-index:2147483001;pointer-events:none;animation:ee-pop 3.2s ease both';
+      document.body.appendChild(t);
+      setTimeout(function () { t.remove(); }, 3300);
+    }
+    function clear(ms) { setTimeout(function () { if (layer) layer.innerHTML = ''; }, ms); }
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+
+    // Little IC package: body with pins on both sides.
+    function chipSvg(size, color) {
+      return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.6" stroke-linecap="round">' +
+        '<rect x="6" y="6" width="12" height="12" rx="1.5" fill="' + color + '" fill-opacity=".18"/><circle cx="9" cy="9" r=".9" fill="' + color + '"/>' +
+        '<path d="M9 3v3M12 3v3M15 3v3M9 18v3M12 18v3M15 18v3M3 9h3M3 12h3M3 15h3M18 9h3M18 12h3M18 15h3"/></svg>';
+    }
+
+    function rain(count, html) {
+      var l = ensureLayer();
+      for (var i = 0; i < count; i++) {
+        var d = document.createElement('div');
+        d.innerHTML = html();
+        d.style.cssText = 'position:absolute;top:-60px;left:' + rnd(0, 100) + 'vw;--r:' + rnd(-540, 540) + 'deg;' +
+          'animation:ee-fall ' + rnd(2.2, 4.2) + 's ' + rnd(0, 1.4) + 's cubic-bezier(.4,0,.8,.6) forwards';
+        l.appendChild(d);
+      }
+      clear(7000);
+    }
+
+    function chipRain() {
+      var colors = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#f472b6'];
+      rain(46, function () { return chipSvg(Math.round(rnd(22, 44)), colors[Math.floor(Math.random() * colors.length)]); });
+    }
+
+    var eggs = {
+      chip: function () {
+        toast('Chips down. Handle with ESD care.');
+        if (!reduce) chipRain();
+      },
+      wafer: function () {
+        toast('300 mm of pure silicon. Mind the notch.');
+        var l = ensureLayer();
+        var n = 15, s = 240, c = s / 2, cell = 22, dies = '';
+        for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+          var cx = x * cell - (n * cell) / 2 + c + cell / 2, cy = y * cell - (n * cell) / 2 + c + cell / 2;
+          var dx = cx - c, dy = cy - c;
+          if (Math.sqrt(dx * dx + dy * dy) < c - 14) {
+            var hue = 200 + Math.round(((x + y) / (2 * n)) * 90);
+            var bad = Math.random() < 0.06;
+            dies += '<rect x="' + (cx - 9) + '" y="' + (cy - 9) + '" width="18" height="18" rx="1.5" fill="' + (bad ? '#f87171' : 'hsl(' + hue + ',70%,60%)') + '" fill-opacity=".85"/>';
+          }
+        }
+        var w = document.createElement('div');
+        w.style.cssText = 'position:absolute;left:50%;top:50%;margin:-' + c * 1.2 + 'px 0 0 -' + c * 1.2 + 'px;width:' + s * 1.2 + 'px;height:' + s * 1.2 + 'px;animation:ee-fade 4.2s ease both';
+        w.innerHTML = '<svg viewBox="0 0 ' + s + ' ' + s + '" width="100%" height="100%" style="' + (reduce ? '' : 'animation:ee-spin 4.2s linear') + '">' +
+          '<circle cx="' + c + '" cy="' + c + '" r="' + (c - 2) + '" fill="#cbd5e1" stroke="#64748b" stroke-width="3"/>' +
+          '<path d="M' + (c - 14) + ' ' + (s - 3) + ' a14 14 0 0 1 28 0z" fill="#0f172a"/>' + dies + '</svg>';
+        l.appendChild(w);
+        clear(4400);
+      },
+      moore: function () { toast("Moore's law: transistor count doubles about every two years. For now."); },
+      etch: function () {
+        toast('Anisotropic etch: straight down, no undercut.');
+        if (reduce) return;
+        rain(60, function () { return '<div style="width:2px;height:' + Math.round(rnd(14, 40)) + 'px;background:linear-gradient(#a78bfa,transparent);border-radius:2px"></div>'; });
+      },
+      litho: function () {
+        toast('193 nm light, 13.5 nm EUV, and a very expensive mirror.');
+        var l = ensureLayer();
+        var b = document.createElement('div');
+        b.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(167,139,250,.55),rgba(56,189,248,.25) 45%,transparent 70%);animation:ee-fade 1.8s ease both';
+        l.appendChild(b);
+        clear(2000);
+      },
+      yield: function () { toast('Die yield: 99.9%. (Nobody believes the other 0.1%.)'); },
+      bug: function () {
+        toast('Found a defect. Sending it to review.');
+        var l = ensureLayer();
+        var d = document.createElement('div');
+        d.textContent = '🐛';
+        d.style.cssText = 'position:absolute;bottom:20px;left:0;font-size:28px;animation:ee-scurry 5s linear forwards';
+        l.appendChild(d);
+        clear(5200);
+      },
+      fab: function () { toast('Cleanroom rule 1: no one talks about particle counts. Rule 2: everyone does.'); },
+      nano: function () { toast('A human hair is ~80,000 nm wide. Current nodes are marketing, not measurements.'); },
+      sand: function () { toast('Sand in. Intelligence out. Many steps in between.'); },
+    };
+
+    function circuit() {
+      toast('↑↑↓↓←→←→BA: trace routed.');
+      var l = ensureLayer();
+      var w = innerWidth, h = innerHeight, paths = '';
+      for (var i = 0; i < 14; i++) {
+        var x = rnd(0, w), y = rnd(0, h), d = 'M' + x + ' ' + y;
+        for (var k = 0; k < 6; k++) {
+          if (k % 2) y += rnd(-160, 160); else x += rnd(-220, 220);
+          d += ' L' + x + ' ' + y;
+        }
+        paths += '<path d="' + d + '" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" style="animation:ee-trace 1.6s ' + (i * 0.08) + 's ease forwards"/>' +
+          '<circle cx="' + x + '" cy="' + y + '" r="4" fill="#34d399"/>';
+      }
+      var s = document.createElement('div');
+      s.style.cssText = 'position:absolute;inset:0;animation:ee-fade 4s ease both';
+      s.innerHTML = '<svg width="100%" height="100%" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".8">' + paths + '</svg>';
+      l.appendChild(s);
+      clear(4200);
+    }
+
+    // ---- Chippy: a helpful little IC who knows where the eggs are ----
+    var cpyCss = document.createElement('style');
+    cpyCss.textContent =
+      '.cpy{position:fixed;left:0;bottom:calc(2px + env(safe-area-inset-bottom,0px));width:64px;height:76px;z-index:2147482999;cursor:pointer;will-change:transform;-webkit-tap-highlight-color:transparent;outline:none}' +
+      '.cpy:focus-visible .cpy-svg{outline:2px solid #38bdf8;outline-offset:4px;border-radius:8px}' +
+      '.cpy-svg{display:block;overflow:visible;filter:drop-shadow(0 6px 10px rgba(0,0,0,.28));animation:cpy-pop .6s cubic-bezier(.34,1.56,.64,1) both}' +
+      '.cpy-leg,.cpy-arm,.cpy-eyes,.cpy-brow{transform-box:fill-box}' +
+      '.cpy-leg{transform-origin:50% 0}' +
+      '.cpy.walk .cpy-leg-l{animation:cpy-step .42s ease-in-out infinite alternate}' +
+      '.cpy.walk .cpy-leg-r{animation:cpy-step .42s ease-in-out infinite alternate-reverse}' +
+      '.cpy.walk .cpy-body{animation:cpy-bob .21s ease-in-out infinite alternate}' +
+      '.cpy-eyes{transform-origin:center;animation:cpy-blink 4.6s infinite}' +
+      '.cpy-pupil{transition:transform .25s}' +
+      '.cpy.left .cpy-pupil{transform:translateX(-3px)}' +
+      '.cpy.talk .cpy-brow{animation:cpy-brow 1.3s ease-in-out infinite}' +
+      '.cpy-arm{transform-origin:0 50%}' +
+      '.cpy.talk .cpy-arm{animation:cpy-wave .38s ease-in-out infinite alternate}' +
+      '.cpy.bye .cpy-svg{animation:cpy-out .4s ease-in both}' +
+      '@keyframes cpy-step{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}' +
+      '@keyframes cpy-bob{to{transform:translateY(-2px)}}' +
+      '@keyframes cpy-blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}' +
+      '@keyframes cpy-brow{0%,55%,100%{transform:translateY(0)}65%,85%{transform:translateY(-2.5px)}}' +
+      '@keyframes cpy-wave{from{transform:rotate(12deg)}to{transform:rotate(-28deg)}}' +
+      '@keyframes cpy-pop{from{transform:translateY(90px)}to{transform:none}}' +
+      '@keyframes cpy-out{to{transform:translateY(90px)}}' +
+      '.cpy-bubble{position:fixed;left:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));width:max-content;max-width:min(270px,calc(100vw - 32px));box-sizing:border-box;' +
+      'padding:10px 30px 11px 14px;border-radius:14px;background:rgba(15,23,42,.96);color:#e2e8f0;border:1px solid rgba(56,189,248,.35);' +
+      'font:500 13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:2147483000;' +
+      'opacity:0;transform:translateY(6px) scale(.97);transform-origin:var(--tail,50%) 100%;transition:opacity .18s ease,transform .18s ease;pointer-events:none}' +
+      '.cpy-bubble.show{opacity:1;transform:none;pointer-events:auto}' +
+      '.cpy-bubble:after{content:"";position:absolute;bottom:-8px;left:var(--tail,50%);margin-left:-8px;width:15px;height:15px;background:inherit;' +
+      'border-right:1px solid rgba(56,189,248,.35);border-bottom:1px solid rgba(56,189,248,.35);transform:rotate(45deg)}' +
+      '.cpy-bubble b{color:#38bdf8;font-weight:700}' +
+      '.cpy-x{position:absolute;top:3px;right:4px;border:0;background:none;color:#94a3b8;font:400 18px/1 system-ui,sans-serif;padding:4px 7px;cursor:pointer;border-radius:6px}' +
+      '.cpy-x:hover,.cpy-x:focus-visible{color:#fff;background:rgba(148,163,184,.18)}' +
+      '@media print{.cpy,.cpy-bubble{display:none!important}}';
+    document.head.appendChild(cpyCss);
+
+    function chippySvg() {
+      var pin = 'stroke="#94a3b8" stroke-width="2.6"';
+      return '<svg class="cpy-svg" viewBox="0 0 64 76" width="64" height="76" fill="none" stroke-linecap="round" stroke-linejoin="round">' +
+        '<g class="cpy-leg cpy-leg-l"><path d="M26 56v12h-5" ' + pin + '/></g>' +
+        '<g class="cpy-leg cpy-leg-r"><path d="M38 56v12h5" ' + pin + '/></g>' +
+        '<g class="cpy-body">' +
+          '<path d="M22 8V3M32 8V1M42 8V3M10 21H5M10 29H5M54 21h5M54 29h5M10 40H6l-3 5" ' + pin + '/>' +
+          '<g class="cpy-arm"><path d="M54 40h4l4-6" ' + pin + '/></g>' +
+          '<rect x="10" y="8" width="44" height="48" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>' +
+          '<circle cx="16" cy="14" r="1.6" fill="#38bdf8"/>' +
+          '<path class="cpy-brow" d="M19 19.5q5-4 10 0M35 19.5q5-4 10 0" stroke="#e2e8f0" stroke-width="2"/>' +
+          '<g class="cpy-eyes"><ellipse cx="24" cy="28" rx="5" ry="6" fill="#fff"/><ellipse cx="40" cy="28" rx="5" ry="6" fill="#fff"/>' +
+            '<circle class="cpy-pupil" cx="25.5" cy="29" r="2.4" fill="#0f172a"/><circle class="cpy-pupil" cx="41.5" cy="29" r="2.4" fill="#0f172a"/></g>' +
+          '<path d="M26 41q6 5 12 0" stroke="#e2e8f0" stroke-width="2"/>' +
+          '<text x="32" y="52" text-anchor="middle" font-size="5" font-family="ui-monospace,monospace" fill="#64748b" stroke="none">CHPY-01</text>' +
+        '</g></svg>';
+    }
+
+    var tips = [
+      "Hi! I'm <b>Chippy</b>. It looks like you're browsing a website. Would you like help finding its secrets?",
+      'Click me for another tip, or hit × to send me back to the fab.',
+      'Psst. Just start typing on the page (not in a text box). Try <b>wafer</b>.',
+      'Type <b>chip</b> for a little shower of silicon. ESD strap recommended.',
+      'Click the very <b>top-left corner</b> of the screen, then the <b>top-right</b>. Alignment marks matter.',
+      'Gamers: <b>↑ ↑ ↓ ↓ ← → ← → B A</b>',
+      'More magic words: <b>etch</b>, <b>litho</b>, <b>bug</b>, <b>yield</b>, <b>moore</b>, <b>fab</b>, <b>nano</b>, <b>sand</b>.',
+      'Developers: open the browser <b>console</b>. Someone left a note in there.',
+      "That's every secret I know. Back to the cleanroom! Type <b>chippy</b> if you miss me.",
+    ];
+
+    var cp = null; // live Chippy state, or null when he's off duty
+    function cpPos() { cp.el.style.transform = 'translate3d(' + cp.x.toFixed(1) + 'px,0,0)'; }
+    function cpMaxX() { return Math.max(16, innerWidth - 80); }
+
+    function summonChippy() {
+      if (cp) { if (cp.state !== 'leave') cpTalk(); return; }
+      var el = document.createElement('div');
+      el.className = 'cpy';
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', 'Chippy, the easter egg helper. Activate for a tip.');
+      el.innerHTML = chippySvg();
+      var bub = document.createElement('div');
+      bub.className = 'cpy-bubble';
+      bub.setAttribute('role', 'status');
+      bub.setAttribute('aria-live', 'polite');
+      bub.innerHTML = '<span class="cpy-msg"></span><button type="button" class="cpy-x" aria-label="Dismiss Chippy">×</button>';
+      document.body.appendChild(el);
+      document.body.appendChild(bub);
+      cp = { el: el, bub: bub, x: reduce ? cpMaxX() : -70, dir: 1, target: 0, state: 'walk', tip: 0, timer: 0, raf: 0, last: 0 };
+      cpPos();
+      el.addEventListener('click', function () { if (cp && cp.state !== 'leave') cpTalk(); });
+      el.addEventListener('keydown', function (e) {
+        if ((e.key === 'Enter' || e.key === ' ') && cp && cp.state !== 'leave') { e.preventDefault(); cpTalk(); }
+      });
+      bub.querySelector('.cpy-x').addEventListener('click', function (e) { e.stopPropagation(); cpLeave(); });
+      if (reduce) { cpTalk(); return; }
+      cpWalkTo(rnd(innerWidth * 0.15, innerWidth * 0.55));
+      cp.raf = requestAnimationFrame(cpTick);
+    }
+
+    function cpWalkTo(x) {
+      cp.target = Math.min(Math.max(x, 16), cpMaxX());
+      cp.dir = cp.target >= cp.x ? 1 : -1;
+      cp.state = 'walk';
+      cp.el.classList.add('walk');
+      cp.el.classList.remove('talk');
+      cp.el.classList.toggle('left', cp.dir < 0);
+    }
+
+    function cpTick(now) {
+      if (!cp) return;
+      var dt = cp.last ? Math.min((now - cp.last) / 1000, 0.05) : 0;
+      cp.last = now;
+      if (cp.state === 'walk' || cp.state === 'leave') {
+        var speed = cp.state === 'leave' ? 140 : 62;
+        cp.x += speed * dt * cp.dir;
+        if ((cp.dir > 0 && cp.x >= cp.target) || (cp.dir < 0 && cp.x <= cp.target)) {
+          cp.x = cp.target;
+          if (cp.state === 'leave') { cpPos(); cpRemove(); return; }
+          cpTalk();
+        }
+        cpPos();
+      }
+      cp.raf = requestAnimationFrame(cpTick);
+    }
+
+    function cpTalk() {
+      clearTimeout(cp.timer);
+      cp.state = 'talk';
+      cp.el.classList.remove('walk');
+      cp.el.classList.add('talk');
+      var msg = tips[cp.tip % tips.length], last = cp.tip === tips.length - 1;
+      cp.tip++;
+      var bub = cp.bub;
+      bub.querySelector('.cpy-msg').innerHTML = msg;
+      // Centre the bubble over Chippy, kept inside the viewport, with the tail pointing at him.
+      var w = bub.offsetWidth, mid = cp.x + 32;
+      var left = Math.min(Math.max(mid - w / 2, 16), Math.max(16, innerWidth - w - 16));
+      bub.style.left = left + 'px';
+      bub.style.setProperty('--tail', Math.min(Math.max(mid - left, 18), w - 18) + 'px');
+      bub.classList.remove('show');
+      void bub.offsetWidth;
+      bub.classList.add('show');
+      var hold = Math.max(4200, msg.replace(/<[^>]+>/g, '').length * 65);
+      cp.timer = setTimeout(function () {
+        if (!cp) return;
+        bub.classList.remove('show');
+        if (last) { cpLeave(); return; }
+        if (reduce) return; // stays put; click for the next tip
+        // Wander somewhere at least a little way off, then share the next tip.
+        var to = rnd(16, cpMaxX());
+        if (Math.abs(to - cp.x) < 140) to = cp.x > innerWidth / 2 ? rnd(16, cp.x - 140) : rnd(cp.x + 140, cpMaxX());
+        cp.timer = setTimeout(function () { if (cp && cp.state === 'talk') cpWalkTo(to); }, 450);
+      }, hold);
+    }
+
+    function cpLeave() {
+      if (!cp) return;
+      clearTimeout(cp.timer);
+      cp.bub.classList.remove('show');
+      if (reduce) { cp.state = 'leave'; cp.el.classList.add('bye'); setTimeout(cpRemove, 400); return; }
+      var right = cp.x > innerWidth / 2;
+      cpWalkTo(cp.x);
+      cp.state = 'leave';
+      cp.dir = right ? 1 : -1;
+      cp.target = right ? innerWidth + 80 : -90;
+      cp.el.classList.toggle('left', !right);
+    }
+
+    function cpRemove() {
+      if (!cp) return;
+      cancelAnimationFrame(cp.raf);
+      clearTimeout(cp.timer);
+      cp.el.remove();
+      cp.bub.remove();
+      cp = null;
+    }
+
+    addEventListener('resize', function () {
+      if (!cp || cp.state === 'leave') return;
+      cp.x = Math.min(cp.x, cpMaxX());
+      if (cp.state === 'walk') cp.target = Math.min(cp.target, cpMaxX());
+      cpPos();
+    });
+    // View transitions replace <body>; carry Chippy over to the new page.
+    document.addEventListener('astro:after-swap', function () {
+      if (cp) { document.body.appendChild(cp.el); document.body.appendChild(cp.bub); }
+    });
+
+    // Chippy also turns up on his own once per visit, after 90 seconds of looking at the site.
+    (function () {
+      var KEY_T = 'ee-chippy-seconds', KEY_DONE = 'ee-chippy-shown', secs = 0;
+      function get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+      function set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+      if (get(KEY_DONE)) return;
+      secs = parseInt(get(KEY_T), 10) || 0;
+      var iv = setInterval(function () {
+        if (document.visibilityState !== 'visible') return;
+        secs++;
+        set(KEY_T, String(secs));
+        if (secs >= 90) {
+          clearInterval(iv);
+          set(KEY_DONE, '1');
+          summonChippy();
+        }
+      }, 1000);
+    })();
+
+    // Typed words. Longest first, so "chippy" wins over "chip".
+    var buf = '', pend = null;
+    var words = Object.keys(eggs).concat('chippy').sort(function (a, b) { return b.length - a.length; });
+    function fire(w) { if (w === 'chippy') summonChippy(); else eggs[w](); }
+    // A longer word that starts with w and that the buffer could still be typing toward.
+    function stillTyping(w) {
+      return words.some(function (L) {
+        if (L.length <= w.length || L.indexOf(w) !== 0) return false;
+        for (var k = w.length + 1; k <= L.length; k++) if (buf.slice(-k) === L.slice(0, k)) return true;
+        return false;
+      });
+    }
+    function hasLonger(w) {
+      return words.some(function (L) { return L.length > w.length && L.indexOf(w) === 0; });
+    }
+    addEventListener('keydown', function (e) {
+      var t = e.target, tag = t && t.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+      handleKonami(e.key);
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+      buf = (buf + e.key.toLowerCase()).slice(-12);
+      // "chip" waits a beat in case it's becoming "chippy".
+      if (pend) {
+        clearTimeout(pend.timer);
+        var p = pend.word;
+        pend = null;
+        if (!stillTyping(p)) fire(p);
+      }
+      for (var i = 0; i < words.length; i++) {
+        var w = words[i];
+        if (buf.slice(-w.length) !== w) continue;
+        if (hasLonger(w)) {
+          pend = { word: w, timer: setTimeout(function () { var q = pend && pend.word; pend = null; if (q) fire(q); }, 650) };
+        } else {
+          buf = '';
+          fire(w);
+        }
+        break;
+      }
+    });
+
+    // Konami code
+    var seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'], pos = 0;
+    function handleKonami(k) {
+      var key = k.length === 1 ? k.toLowerCase() : k;
+      pos = key === seq[pos] ? pos + 1 : key === seq[0] ? 1 : 0;
+      if (pos === seq.length) { pos = 0; circuit(); }
+    }
+
+    // Corner-to-corner: click the top-left corner, then the top-right (either order) within 3 s.
+    // The first hit is kept in sessionStorage, so it survives if that click landed on the logo and navigated.
+    var CORNER = 32, CORNER_KEY = 'ee-corner', cornerMem = null;
+    function cornerGet() { try { return JSON.parse(sessionStorage.getItem(CORNER_KEY)); } catch (e) { return cornerMem; } }
+    function cornerSet(v) { cornerMem = v; try { sessionStorage.setItem(CORNER_KEY, JSON.stringify(v)); } catch (e) {} }
+    document.addEventListener('click', function (e) {
+      if (e.clientY > CORNER) return;
+      var side = e.clientX <= CORNER ? 'l' : e.clientX >= innerWidth - CORNER ? 'r' : null;
+      if (!side) return;
+      var now = Date.now(), prev = cornerGet();
+      if (prev && prev.s !== side && now - prev.t < 3000) {
+        cornerSet(null);
+        toast('Alignment check passed: corner marks in spec.');
+        if (!reduce) chipRain();
+      } else {
+        cornerSet({ s: side, t: now });
+      }
+    }, true);
+
+    try {
+      console.log('%cHello, fellow fab nerd.', 'font:700 16px monospace;color:#38bdf8');
+      console.log('Try typing: ' + Object.keys(eggs).join(', ') + '. Or the Konami code. Lost? Type chippy.');
+    } catch (e) {}
+  })();
+</script>
