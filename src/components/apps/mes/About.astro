@@ -1,0 +1,124 @@
+---
+/** About tab: what the simulator models, the personas, E10 states and a short glossary. */
+import { e10, personas, meta, areas, tools, type E10 } from '~/data/mes';
+
+const glossary = [
+  [
+    'MES',
+    'Manufacturing execution system: the software that tracks every lot, tool and step in the fab and enforces the rules.',
+  ],
+  [
+    'Lot',
+    'A FOUP of up to 25 wafers that travels the route together. Lots can be split; the child keeps the parent history (genealogy).',
+  ],
+  [
+    'Route / operation',
+    'The ordered list of process steps for a product. Logic routes are re-entrant: lots visit litho and etch many times.',
+  ],
+  [
+    'Track in / track out',
+    'Starting and finishing a lot on a tool. The MES checks the tool is qualified for the step and records the recipe.',
+  ],
+  ['Dispatching', 'Choosing which queued lot a free tool runs next, here by priority and critical ratio.'],
+  ['Critical ratio (CR)', 'Time left until the due date divided by the work left. Below 1.0 the lot is behind.'],
+  [
+    'Q-time',
+    'A maximum wait between two steps (for example clean to oxidation) before native oxide or contamination ruins the wafer.',
+  ],
+  [
+    'SEMI E10',
+    'The industry standard for equipment states: productive, standby, engineering, scheduled down, unscheduled down, non-scheduled.',
+  ],
+  [
+    'SPC / OCAP',
+    'Statistical process control charts and the out-of-control action plan they trigger: hold the lot, inhibit the tool.',
+  ],
+  ['Cpk', 'Process capability: how many 3σ fit between the mean and the nearest spec limit. 1.33 is a common target.'],
+  ['Commonality', 'Yield analysis that asks which tool, chamber or step the bad lots had in common.'],
+  ['X-factor', 'Cycle time divided by raw process time: how much of a lot’s life is spent waiting.'],
+];
+const states = Object.keys(e10) as E10[];
+---
+
+<section class="view" data-view="about" data-title="About">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">How it works</p>
+      <h1 class="view-title">About this MES</h1>
+      <p class="view-lede">{meta.disclaimer}</p>
+    </div>
+  </div>
+  <div class="mes-grid">
+    <article class="card span-7">
+      <div class="prose-app"><slot /></div>
+      <h2 class="card-title" style="margin-top:20px">What is simulated</h2>
+      <ul class="text-2" style="font-size:13.5px;display:grid;gap:6px;margin-top:8px;list-style:disc;padding-left:18px">
+        <li>
+          {tools.length} tools in {areas.length} areas, three products on two re-entrant routes (31 and 19 operations), about
+          55 lots in the line.
+        </li>
+        <li>
+          Tools fail at random (more often when worn), get repaired, qualified and released; PMs run on wafer counters.
+        </li>
+        <li>
+          Metrology steps produce SPC points. Worn tools drift; Western Electric rules hold lots and inhibit tools.
+        </li>
+        <li>
+          Each worn tool leaves a signature on the lots it runs: edge ring from etch, center loss from film and implant,
+          repeaters from litho, scratches from CMP. Probe turns it into die yield and wafer maps.
+        </li>
+        <li>ETCH-03 is the fab's problem tool: its chamber wears about three times faster than its siblings.</li>
+        <li>
+          The autopilot crew does routine work so the fab keeps moving. Switch it off in the status bar to run
+          everything yourself.
+        </li>
+      </ul>
+    </article>
+    <article class="card span-5">
+      <h2 class="card-title">Personas</h2>
+      <p class="card-sub">Switch in the top bar. Actions another role owns are locked and say who can do them.</p>
+      <ul style="display:grid;gap:12px;margin-top:12px">
+        {
+          personas.map((p) => (
+            <li>
+              <button type="button" class="link strong" data-persona={p.id}>
+                {p.role}
+              </button>
+              <p class="text-2" style="font-size:13px">
+                {p.blurb}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+    <article class="card span-5">
+      <h2 class="card-title">Equipment states (SEMI E10)</h2>
+      <ul style="display:grid;gap:8px;margin-top:12px;font-size:13px">
+        {
+          states.map((s) => (
+            <li class="flex gap-3 items-start">
+              <span class={`badge ${e10[s].cls}`} style="min-width:140px">
+                {e10[s].name}
+              </span>
+              <span class="text-2">{e10[s].hint}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+    <article class="card span-7">
+      <h2 class="card-title">Glossary</h2>
+      <dl style="display:grid;gap:10px;margin-top:12px;font-size:13px">
+        {
+          glossary.map(([t, d]) => (
+            <div>
+              <dt class="font-semibold">{t}</dt>
+              <dd class="text-2">{d}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </article>
+  </div>
+</section>

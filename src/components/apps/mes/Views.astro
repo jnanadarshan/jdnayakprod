@@ -1,0 +1,449 @@
+---
+/**
+ * Static skeleton of every MES tab: headings, filters and the [data-r] slots that
+ * src/scripts/apps/mes/views.ts fills from the live simulation.
+ */
+import { Icon } from 'astro-icon/components';
+import { areas, e10, priorities, products, spcParams, type E10 } from '~/data/mes';
+
+const states: E10[] = ['PRD', 'SBY', 'ENG', 'SDT', 'UDT', 'NST'];
+const noscript = 'This app runs a live fab simulation in your browser. Turn on JavaScript to use it.';
+---
+
+<section class="view" data-view="workspace" data-title="My work">
+  <noscript><p class="notice">{noscript}</p></noscript>
+  <div data-r="workspace"></div>
+</section>
+
+<section class="view" data-view="overview" data-title="Fab overview">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">FAB-1 · 300 mm</p>
+      <h1 class="view-title">Fab overview</h1>
+      <p class="view-lede">Line health at a glance: WIP, moves, outs, cycle time, yield and equipment state.</p>
+    </div>
+  </div>
+  <div data-r="kpis"></div>
+  <div class="mes-grid" style="margin-top:14px">
+    <article class="card span-5">
+      <div class="card-head">
+        <div><h2 class="card-title">WIP by area</h2><p class="card-sub">Lots at each area's next step</p></div>
+        <a href="#lots" class="badge badge-primary">Lots <Icon name="tabler:arrow-right" /></a>
+      </div>
+      <div data-r="wip-area"></div>
+    </article>
+    <article class="card span-7">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Moves per hour</h2><p class="card-sub">Wafer-steps completed, last 24 hours</p>
+        </div>
+      </div>
+      <div data-r="moves"></div>
+    </article>
+    <article class="card span-5">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Equipment state now</h2><p class="card-sub">One segment per tool · SEMI E10</p>
+        </div>
+        <a href="#equipment" class="badge badge-primary">Equipment <Icon name="tabler:arrow-right" /></a>
+      </div>
+      <div data-r="e10"></div>
+    </article>
+    <article class="card span-7">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Line profile · LGC-28 route</h2>
+          <p class="card-sub">WIP at each operation; tall bars are where the line is queuing</p>
+        </div>
+      </div>
+      <div data-r="profile"></div>
+      <div class="legend" style="margin-top:12px">
+        <span><i class="bg-1"></i>Running</span><span><i class="bg-seq"></i>Queued</span><span
+          ><i class="bg-hold"></i>On hold</span
+        >
+      </div>
+    </article>
+    <article class="card span-12">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Live activity</h2><p class="card-sub">Lot, tool, SPC and user events, newest first</p>
+        </div>
+      </div>
+      <div class="scroll-y" data-r="feed"></div>
+    </article>
+  </div>
+</section>
+
+<section class="view" data-view="lots" data-title="Lots">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Lot tracking</p>
+      <h1 class="view-title">Lots</h1>
+      <p class="view-lede">
+        Every lot in the line: where it is, what it waits for and whether it will make its due date.
+      </p>
+    </div>
+    <div class="btn-row" data-r="lots-actions"></div>
+  </div>
+  <div class="toolbar">
+    <div class="chips" data-chipgroup role="group" aria-label="WIP or completed">
+      <button type="button" class="chip" data-lots-mode="wip" aria-pressed="true">In line</button>
+      <button type="button" class="chip" data-lots-mode="shipped" aria-pressed="false">Completed</button>
+    </div>
+    <div class="chips" data-chipgroup data-lots-wip-only role="group" aria-label="Lot state">
+      {
+        [
+          ['all', 'All'],
+          ['queued', 'Queued'],
+          ['running', 'Running'],
+          ['hold', 'On hold'],
+        ].map(([v, l]) => (
+          <button type="button" class="chip" data-lots-state={v} aria-pressed={v === 'all' ? 'true' : 'false'}>
+            {l}
+            <span class="count" data-lots-count={v} />
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <div class="toolbar">
+    <label class="field">
+      <Icon name="tabler:search" />
+      <input type="search" data-lots-search placeholder="Lot ID, product, step or tool" aria-label="Search lots" />
+    </label>
+    <label class="field field-select">
+      <Icon name="tabler:package" />
+      <select data-lots-product aria-label="Product">
+        <option value="all">All products</option>
+        {
+          products.map((p) => (
+            <option value={p.id}>
+              {p.id} · {p.name}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+    <label class="field field-select">
+      <Icon name="tabler:flame" />
+      <select data-lots-prio aria-label="Priority">
+        <option value="all">All priorities</option>
+        {Object.entries(priorities).map(([k, v]) => <option value={k}>{v.name}</option>)}
+      </select>
+    </label>
+  </div>
+  <p class="result-count" data-r="lots-count"></p>
+  <div class="card table-card"><div class="table-wrap" data-r="lots"></div></div>
+</section>
+
+<section class="view" data-view="dispatch" data-title="Dispatch">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">What next</p>
+      <h1 class="view-title">Dispatch</h1>
+      <p class="view-lede">
+        Each tool's queue in the order the dispatcher recommends. Q-time-critical lots jump ahead; CR is the critical
+        ratio (below 1.0 means the lot is behind its due date).
+      </p>
+    </div>
+    <label class="field field-select">
+      <Icon name="tabler:list-numbers" />
+      <select data-dispatch-rule aria-label="Dispatch rule">
+        <option value="cr">Priority, then critical ratio</option>
+        <option value="prio">Priority, then FIFO</option>
+        <option value="edd">Earliest due date</option>
+        <option value="fifo">First in, first out</option>
+      </select>
+    </label>
+  </div>
+  <div class="toolbar">
+    <div class="chips" data-chipgroup role="group" aria-label="Area">
+      {
+        areas.map((a) => (
+          <button
+            type="button"
+            class="chip"
+            data-dispatch-area={a.id}
+            aria-pressed={a.id === 'litho' ? 'true' : 'false'}
+          >
+            {a.name}
+            <span class="count" data-dispatch-count={a.id} />
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <div data-r="dispatch"></div>
+</section>
+
+<section class="view" data-view="equipment" data-title="Equipment">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Tool status</p>
+      <h1 class="view-title">Equipment</h1>
+      <p class="view-lede">Every tool's SEMI E10 state, what it is running, its last 24 hours and its PM counter.</p>
+    </div>
+    <label class="field field-select">
+      <Icon name="tabler:building-factory-2" />
+      <select data-equip-area aria-label="Area">
+        <option value="all">All areas</option>
+        {areas.map((a) => <option value={a.id}>{a.name}</option>)}
+      </select>
+    </label>
+  </div>
+  <div class="toolbar">
+    <div class="chips" data-chipgroup role="group" aria-label="Equipment state">
+      <button type="button" class="chip" data-equip-state="all" aria-pressed="true"
+        >All <span class="count" data-equip-count="all"></span></button
+      >
+      {
+        states.map((s) => (
+          <button type="button" class="chip" data-equip-state={s} aria-pressed="false" title={e10[s].hint}>
+            <span class={`dot f-${s}`} />
+            {e10[s].name}
+            <span class="count" data-equip-count={s} />
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <div data-r="tools"></div>
+</section>
+
+<section class="view" data-view="maintenance" data-title="Maintenance">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Keep tools up</p>
+      <h1 class="view-title">Maintenance</h1>
+      <p class="view-lede">Preventive maintenance counters, work orders and repair times.</p>
+    </div>
+  </div>
+  <div class="mes-grid">
+    <article class="card span-7">
+      <div class="card-head">
+        <div><h2 class="card-title">PM schedule</h2><p class="card-sub">Wafer counters, most due first</p></div>
+      </div>
+      <div class="table-wrap scroll-y" style="max-height:620px" data-r="pm"></div>
+    </article>
+    <div class="stack span-5">
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Mean time to repair</h2><p class="card-sub">Closed repair work orders by area</p>
+          </div>
+        </div>
+        <div data-r="mttr"></div>
+      </article>
+      <article class="card">
+        <div class="card-head">
+          <div><h2 class="card-title">Work orders</h2><p class="card-sub">Open first, then most recent</p></div>
+        </div>
+        <div class="table-wrap scroll-y" data-r="wo"></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="alarms" data-title="Alarms">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Alarm management</p>
+      <h1 class="view-title">Alarms</h1>
+      <p class="view-lede">
+        Equipment faults, SPC signals, Q-time violations and yield alerts. Acknowledge, then clear.
+      </p>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="chips" data-chipgroup role="group" aria-label="Active or all">
+      <button type="button" class="chip" data-alarm-mode="active" aria-pressed="true">Active</button>
+      <button type="button" class="chip" data-alarm-mode="all" aria-pressed="false">History</button>
+    </div>
+    <div class="chips" data-chipgroup role="group" aria-label="Severity">
+      <button type="button" class="chip" data-alarm-sev="all" aria-pressed="true">All severities</button>
+      <button type="button" class="chip" data-alarm-sev="crit" aria-pressed="false">Critical</button>
+      <button type="button" class="chip" data-alarm-sev="warn" aria-pressed="false">Warning</button>
+    </div>
+  </div>
+  <p class="result-count" data-r="alarms-count"></p>
+  <div class="card table-card"><div class="table-wrap" data-r="alarms"></div></div>
+</section>
+
+<section class="view" data-view="spc" data-title="SPC">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Statistical process control</p>
+      <h1 class="view-title">SPC</h1>
+      <p class="view-lede">
+        Inline measurements against control and spec limits, colored by the tool that ran the step. A rule 1 violation
+        holds the lot and inhibits the tool (out-of-control action plan).
+      </p>
+    </div>
+    <label class="field field-select">
+      <Icon name="tabler:cpu" />
+      <select data-spc-tool aria-label="Responsible tool"><option value="all">All tools</option></select>
+    </label>
+  </div>
+  <div class="toolbar">
+    <div class="chips" role="group" aria-label="Parameter">
+      {
+        spcParams.map((p) => (
+          <button
+            type="button"
+            class="chip"
+            data-spc-param={p.id}
+            aria-pressed={p.id === 'GATE-CD' ? 'true' : 'false'}
+            title={p.name}
+          >
+            {p.id}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <div class="mes-grid">
+    <article class="card span-9">
+      <div class="card-head">
+        <div><h2 class="card-title">Control chart</h2><p class="card-sub">Last 80 lots measured</p></div>
+      </div>
+      <div class="mchart" data-r="spc-chart"></div>
+      <div class="legend" style="margin-top:12px" data-r="spc-legend"></div>
+    </article>
+    <article class="card span-3">
+      <div class="card-head"><div><h2 class="card-title">Parameter</h2></div></div>
+      <div data-r="spc-info"></div>
+      <h3 class="section-label" style="margin:16px 0 6px">Rules</h3>
+      <ul class="text-2" style="font-size:12.5px;display:grid;gap:4px">
+        <li><b>Rule 1</b> one point beyond ±3σ: hold + inhibit</li>
+        <li><b>Rule 2</b> 2 of 3 points beyond 2σ, same side</li>
+        <li><b>Rule 4</b> 8 points in a row on one side</li>
+      </ul>
+    </article>
+    <article class="card span-7">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Capability by tool</h2><p class="card-sub">Same parameter, each responsible tool</p>
+        </div>
+      </div>
+      <div class="table-wrap" data-r="spc-cap"></div>
+    </article>
+    <article class="card span-5">
+      <div class="card-head">
+        <div><h2 class="card-title">Recent signals</h2><p class="card-sub">All parameters</p></div>
+      </div>
+      <div class="scroll-y" data-r="spc-viol"></div>
+    </article>
+  </div>
+</section>
+
+<section class="view" data-view="yield" data-title="Yield">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Yield analysis</p>
+      <h1 class="view-title">Yield</h1>
+      <p class="view-lede">
+        Probe yield by lot, fail-bin Pareto, wafer maps and tool commonality: which tool did the low-yield lots share?
+      </p>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="chips" role="group" aria-label="Product">
+      <button type="button" class="chip" data-yield-product="all" aria-pressed="true">All products</button>
+      {
+        products.map((p) => (
+          <button type="button" class="chip" data-yield-product={p.id} aria-pressed="false">
+            <span class={`dot bg-${p.series}`} />
+            {p.id}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <div data-r="yield-kpis"></div>
+  <div class="mes-grid" style="margin-top:14px">
+    <article class="card span-8">
+      <div class="card-head">
+        <div><h2 class="card-title">Probe yield by lot</h2><p class="card-sub">Last 7 days, one point per lot</p></div>
+      </div>
+      <div class="mchart" data-r="yield-trend"></div>
+      <div class="legend" style="margin-top:10px" data-r="yield-legend"></div>
+    </article>
+    <article class="card span-4">
+      <div class="card-head">
+        <div><h2 class="card-title">Fail bin Pareto</h2><p class="card-sub">Share of all dies tested</p></div>
+      </div>
+      <div data-r="yield-pareto"></div>
+    </article>
+    <article class="card span-8">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Wafer map</h2><p class="card-sub">
+            Pick a lot, then a wafer. Lowest-yield wafer opens first.
+          </p>
+        </div>
+        <label class="field field-select" style="flex:0 1 300px">
+          <Icon name="tabler:stack-2" />
+          <select data-yield-lot aria-label="Probed lot"></select>
+        </label>
+      </div>
+      <div data-r="yield-wafers"></div>
+      <div class="mes-grid" style="margin-top:14px">
+        <div class="span-7" data-r="yield-map"></div>
+        <div class="span-5" data-r="yield-lotinfo"></div>
+      </div>
+    </article>
+    <article class="card span-4">
+      <div class="card-head">
+        <div><h2 class="card-title">Low-yield lots</h2><p class="card-sub">8+ points below product baseline</p></div>
+      </div>
+      <div class="scroll-y" data-r="yield-low"></div>
+    </article>
+    <article class="card span-12">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Tool commonality</h2>
+          <p class="card-sub">
+            Mean probe yield of lots that ran a step on each tool, against the same step on the other tools. Worst
+            first.
+          </p>
+        </div>
+      </div>
+      <div class="table-wrap" data-r="yield-common"></div>
+    </article>
+  </div>
+</section>
+
+<section class="view" data-view="holds" data-title="Holds">
+  <div class="view-head">
+    <div>
+      <p class="view-eyebrow">Quality</p>
+      <h1 class="view-title">Holds</h1>
+      <p class="view-lede">
+        Lots stopped by SPC, equipment aborts, Q-time violations, inspections or people. Disposition them here.
+      </p>
+    </div>
+  </div>
+  <div class="mes-grid">
+    <div class="span-9">
+      <div class="toolbar">
+        <div class="chips" data-chipgroup role="group" aria-label="Hold category">
+          {
+            ['all', 'SPC', 'Equipment', 'Q-time', 'Defect', 'Manual'].map((c) => (
+              <button type="button" class="chip" data-holds-cat={c} aria-pressed={c === 'all' ? 'true' : 'false'}>
+                {c === 'all' ? 'All' : c}
+                <span class="count" data-holds-count={c} />
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <div class="card table-card"><div class="table-wrap" data-r="holds"></div></div>
+    </div>
+    <article class="card span-3">
+      <div class="card-head">
+        <div><h2 class="card-title">By category</h2><p class="card-sub">Lots on hold now</p></div>
+      </div>
+      <div data-r="holds-sum"></div>
+    </article>
+  </div>
+</section>

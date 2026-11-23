@@ -1,0 +1,155 @@
+---
+import { getEntry, render } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+import '~/assets/styles/mes.css';
+import AppLayout from '~/layouts/AppLayout.astro';
+import MesTop from '~/components/apps/mes/MesTop.astro';
+import MesStatus from '~/components/apps/mes/MesStatus.astro';
+import Views from '~/components/apps/mes/Views.astro';
+import About from '~/components/apps/mes/About.astro';
+
+const entry = await getEntry('apps', 'mes-simulator');
+if (!entry) throw new Error('Missing src/content/apps/mes-simulator.md');
+const { Content } = await render(entry);
+
+const tabs = [
+  { id: 'workspace', label: 'My work', icon: 'tabler:layout-dashboard' },
+  { id: 'overview', label: 'Fab overview', icon: 'tabler:building-factory-2' },
+  { id: 'lots', label: 'Lots', icon: 'tabler:stack-2' },
+  { id: 'dispatch', label: 'Dispatch', icon: 'tabler:list-numbers' },
+  { id: 'equipment', label: 'Equipment', icon: 'tabler:cpu', badge: 'equipment' },
+  { id: 'maintenance', label: 'Maintenance', icon: 'tabler:tool', badge: 'maintenance' },
+  { id: 'alarms', label: 'Alarms', icon: 'tabler:bell', badge: 'alarms' },
+  { id: 'spc', label: 'SPC', icon: 'tabler:chart-line' },
+  { id: 'yield', label: 'Yield', icon: 'tabler:chart-dots' },
+  { id: 'holds', label: 'Holds', icon: 'tabler:hand-stop', badge: 'holds' },
+  { id: 'about', label: 'About', icon: 'tabler:info-circle' },
+];
+
+// Icons the client renderer references by symbol id (#ai:tabler:<name>); each is rendered once here.
+const clientIcons = [
+  'activity',
+  'alert-circle',
+  'alert-octagon',
+  'alert-triangle',
+  'arrow-right',
+  'arrows-split-2',
+  'bell',
+  'bell-ringing',
+  'bolt',
+  'briefcase',
+  'calendar-cog',
+  'chart-dots',
+  'chart-line',
+  'check',
+  'chevron-down',
+  'circle-check',
+  'circle-dot',
+  'clock',
+  'cpu',
+  'flame',
+  'flask',
+  'gavel',
+  'hand-stop',
+  'hourglass',
+  'info-circle',
+  'lock',
+  'moon',
+  'player-pause',
+  'player-play',
+  'plus',
+  'point',
+  'shield-check',
+  'stack-2',
+  'tool',
+  'trash',
+  'trending-up',
+  'truck-delivery',
+  'user',
+  'x',
+];
+
+const metadata = { title: entry.data.title, description: entry.data.summary };
+---
+
+<AppLayout metadata={metadata} class="app-full">
+  <div class="mes-icons" aria-hidden="true">
+    {clientIcons.map((n) => <Icon name={`tabler:${n}`} />)}
+  </div>
+
+  <MesTop tabs={tabs} />
+
+  <main class="mes-main" id="main">
+    <Views />
+    <About><Content /></About>
+  </main>
+
+  <MesStatus />
+
+  <dialog class="sheet mes-sheet" id="mes-sheet" aria-labelledby="mes-sheet-title">
+    <div class="sheet-head">
+      <span class="sheet-grip" aria-hidden="true"></span>
+      <h2 class="text-lg font-bold" id="mes-sheet-title" data-sheet-title>Details</h2>
+      <button type="button" class="app-icon-btn" data-sheet-close aria-label="Close"><Icon name="tabler:x" /></button>
+    </div>
+    <div class="sheet-body" data-sheet-body></div>
+  </dialog>
+
+  <dialog class="mes-dialog" id="mes-action" aria-labelledby="mes-action-title">
+    <form method="dialog">
+      <h2 id="mes-action-title" data-dlg-title>Action</h2>
+      <p class="dlg-sub" data-dlg-sub></p>
+      <div style="display:grid;gap:12px" data-dlg-body></div>
+      <div class="dlg-actions">
+        <button type="button" class="mes-btn" data-dlg-cancel>Cancel</button>
+        <button type="submit" class="mes-btn primary" data-dlg-ok>OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="search-dialog" id="app-search" aria-label="Search lots, tools and views">
+    <div class="search-input-row">
+      <Icon name="tabler:search" />
+      <input
+        id="app-search-input"
+        type="search"
+        placeholder="Lot ID, tool, SPC parameter, view…"
+        autocomplete="off"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="app-search-results"
+      />
+      <button type="button" class="app-icon-btn" data-sheet-close aria-label="Close search"
+        ><Icon name="tabler:x" /></button
+      >
+    </div>
+    <div class="search-results" id="app-search-results" role="listbox"></div>
+    <p class="search-hint">↑ ↓ to move · Enter to open · Esc to close</p>
+  </dialog>
+
+  <div class="mes-toasts" id="mes-toasts" aria-live="polite"></div>
+
+  <div class="mes-splash" id="mes-splash">
+    <div class="mes-splash-inner">
+      <span class="app-brand-mark" aria-hidden="true"><Icon name="tabler:cpu" width={26} height={26} /></span>
+      <p class="font-bold text-lg" style="color:var(--app-text-1)">Starting FAB-1</p>
+      <div class="meter"><span data-splash-bar style="width:0%"></span></div>
+      <p data-splash-note>Loading tools, routes and lots</p>
+      <noscript><p>This app needs JavaScript: it runs a live fab simulation in your browser.</p></noscript>
+    </div>
+  </div>
+
+  <script type="application/json" id="app-search-index">
+    []
+  </script>
+  <script
+    type="application/json"
+    id="mes-views"
+    set:html={JSON.stringify(tabs.map(({ id, label }) => ({ id, label })))}
+  />
+
+  <script>
+    import '~/scripts/apps/mes/main';
+  </script>
+</AppLayout>

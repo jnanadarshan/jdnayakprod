@@ -1,0 +1,42 @@
+---
+/** Bottom status bar: simulation transport, autopilot switch and live fab counters. */
+import { meta } from '~/data/mes';
+const speeds = [
+  { v: 1 / 60, label: '1×', tip: 'Real time' },
+  { v: 1, label: '60×', tip: '1 simulated minute per second' },
+  { v: 5, label: '300×', tip: '5 simulated minutes per second' },
+  { v: 15, label: '900×', tip: '15 simulated minutes per second' },
+];
+---
+
+<footer class="mes-status" aria-label="Simulation and fab status">
+  <button type="button" class="sim-play" data-sim-play aria-pressed="true" title="Pause or resume the simulation">
+    <span class="sim-live"></span>Live
+  </button>
+  <div class="seg" data-chipgroup role="group" aria-label="Simulation speed">
+    {
+      speeds.map((s) => (
+        <button
+          type="button"
+          data-speed={String(s.v)}
+          aria-pressed={s.v === 1 ? 'true' : 'false'}
+          data-tip-title={`Speed ${s.label}`}
+          data-tip-body={s.tip}
+        >
+          {s.label}
+        </button>
+      ))
+    }
+  </div>
+  <label
+    class="switch"
+    data-tip-title="Autopilot crew"
+    data-tip-body="Virtual staff dispatch lots, repair tools, run PMs and disposition holds. Turn it off to run the fab yourself."
+  >
+    <input type="checkbox" id="mes-autopilot" checked />
+    Autopilot
+  </label>
+  <span class="status-sep"></span>
+  <div style="display:contents" data-r="status"></div>
+  <span class="status-right">{meta.fabName} · simulation</span>
+</footer>

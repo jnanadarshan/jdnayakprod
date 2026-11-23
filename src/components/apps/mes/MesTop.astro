@@ -1,0 +1,99 @@
+---
+/** Top bar (brand, sim clock, persona switcher, search, theme) and the app's tab strip. */
+import { Icon } from 'astro-icon/components';
+import { personas } from '~/data/mes';
+
+export interface Tab {
+  id: string;
+  label: string;
+  icon: string;
+  badge?: string;
+}
+export interface Props {
+  tabs: Tab[];
+}
+const { tabs } = Astro.props;
+const tabLabel = new Map(tabs.map((t) => [t.id, t.label]));
+---
+
+<header class="mes-top">
+  <div class="mes-bar">
+    <a href="/apps" class="app-icon-btn" aria-label="Back to all apps" title="All apps"
+      ><Icon name="tabler:arrow-left" /></a
+    >
+    <div class="app-brand">
+      <span class="app-brand-mark" aria-hidden="true"><Icon name="tabler:cpu" width={19} height={19} /></span>
+      <span class="app-brand-text">
+        <span class="app-brand-title">Fab MES</span>
+        <span class="app-brand-sub" data-view-subtitle>My work</span>
+      </span>
+    </div>
+    <div class="mes-clock" data-r="clock" aria-live="off"></div>
+    <div class="mes-spacer"></div>
+
+    <div class="persona" data-persona-root>
+      <button
+        type="button"
+        class="persona-btn"
+        data-persona-toggle
+        data-r="persona-btn"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="Switch persona"
+      >
+        <span class="persona-avatar"><Icon name="tabler:user" /></span>
+      </button>
+      <div class="persona-pop" data-persona-pop role="menu" aria-label="Choose who you are working as">
+        <p class="persona-pop-label">Work as</p>
+        {
+          personas.map((p) => (
+            <button type="button" class="persona-opt" data-persona={p.id} role="menuitemradio" aria-pressed="false">
+              <span class="persona-avatar">
+                <Icon name={p.icon} />
+              </span>
+              <span class="persona-opt-name">
+                {p.role}
+                <small>
+                  {p.person} · {p.badge}
+                </small>
+              </span>
+              <span class="persona-opt-blurb">
+                {p.blurb} <br />
+                <span class="muted">Main tabs: {p.focus.map((f) => tabLabel.get(f) ?? f).join(', ')}</span>
+              </span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="app-search-btn"
+      data-search-open
+      aria-label="Search"
+      aria-keyshortcuts="Control+K Meta+K"
+    >
+      <Icon name="tabler:search" />
+      <span class="label">Lots, tools…</span>
+      <kbd>⌘K</kbd>
+    </button>
+    <button type="button" class="app-icon-btn" data-theme-toggle aria-label="Toggle dark mode" title="Toggle theme">
+      <Icon name="tabler:sun" class="theme-icon-dark" />
+      <Icon name="tabler:moon" class="theme-icon-light" />
+    </button>
+  </div>
+
+  <nav class="mes-tabs" aria-label="MES sections">
+    {
+      tabs.map((t, i) => (
+        <a href={`#${t.id}`} class="mes-tab" data-nav={t.id} aria-current={i === 0 ? 'page' : undefined}>
+          <Icon name={t.icon} />
+          {t.label}
+          <span class="focus-dot" aria-hidden="true" />
+          {t.badge && <span class="mes-tab-badge" data-badge={t.badge} />}
+        </a>
+      ))
+    }
+  </nav>
+</header>
