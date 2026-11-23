@@ -5,405 +5,27 @@
  * primary → ink (--app-text-1), accent-brand → blue, muted / border / card → app surfaces.
  */
 
-type Pill = { cls: string; t: string };
-type HM = 'dom' | 'str' | 'mod' | 'low' | 'none';
+import { stages, crossProcess, columns, heatmap, cellText, chokepoints } from '~/data/wfe/presence';
+import type { PillLevel } from '~/data/wfe/presence';
 
-const PILL_DOM = 'pv-pill pv-pill-dom';
-const PILL_STR = 'pv-pill pv-pill-str';
-const PILL_PRES = 'pv-pill pv-pill-pres';
+const PILL: Record<PillLevel, string> = {
+  dom: 'pv-pill pv-pill-dom',
+  str: 'pv-pill pv-pill-str',
+  pres: 'pv-pill pv-pill-pres',
+};
+const PILL_DOM = PILL.dom;
+const ACCENT: Record<string, string> = {
+  primary: 'pv-accent-primary',
+  'blue-400': 'pv-accent-blue-400',
+  'blue-300': 'pv-accent-blue-300',
+  'indigo-600': 'pv-accent-indigo-600',
+};
 
 const legend = [
   { cls: 'pv-legend-dom', label: 'Dominant (>40% share)' },
   { cls: 'bg-emerald-500/50', label: 'Strong (20–40%)' },
   { cls: 'bg-amber-500/40', label: 'Moderate (10–20%)' },
   { cls: 'pv-legend-pres', label: 'Present (<10%)' },
-];
-
-const stages: { icon: string; name: string; sub: string; highlight: boolean; pills: Pill[] }[] = [
-  {
-    icon: '🔩',
-    name: 'Wafer Prep & Epitaxy',
-    sub: 'Crystal growth, epi layers',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'ASMI' },
-      { cls: PILL_STR, t: 'AMAT' },
-      { cls: PILL_PRES, t: 'TEL' },
-    ],
-  },
-  {
-    icon: '🔥',
-    name: 'Oxidation & Diffusion',
-    sub: 'Thermal processing',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'TEL' },
-      { cls: PILL_STR, t: 'Kokusai' },
-      { cls: PILL_PRES, t: 'ASMI' },
-      { cls: PILL_PRES, t: 'AMAT' },
-    ],
-  },
-  {
-    icon: '🔬',
-    name: 'Lithography',
-    sub: 'Pattern exposure & coat/develop',
-    highlight: true,
-    pills: [
-      { cls: PILL_DOM, t: 'ASML' },
-      { cls: PILL_DOM, t: 'TEL' },
-      { cls: PILL_PRES, t: 'SCREEN' },
-    ],
-  },
-  {
-    icon: '⚡',
-    name: 'Etching',
-    sub: 'Plasma etch, ALE, RIE',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'LAM' },
-      { cls: PILL_STR, t: 'TEL' },
-      { cls: PILL_STR, t: 'AMAT' },
-      { cls: PILL_PRES, t: 'Hitachi HT' },
-    ],
-  },
-  {
-    icon: '🧪',
-    name: 'Deposition',
-    sub: 'CVD, PVD, ALD, ECD',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'AMAT' },
-      { cls: PILL_DOM, t: 'ASMI' },
-      { cls: PILL_STR, t: 'LAM' },
-      { cls: PILL_STR, t: 'TEL' },
-      { cls: PILL_PRES, t: 'Kokusai' },
-    ],
-  },
-  {
-    icon: '💠',
-    name: 'Ion Implantation',
-    sub: 'Doping & modification',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'AMAT' },
-      { cls: PILL_STR, t: 'Axcelis' },
-    ],
-  },
-  {
-    icon: '💎',
-    name: 'CMP',
-    sub: 'Planarization',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'AMAT' },
-      { cls: PILL_STR, t: 'Ebara' },
-    ],
-  },
-  {
-    icon: '🫧',
-    name: 'Cleaning',
-    sub: 'Wet clean, strip, surface prep',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'SCREEN' },
-      { cls: PILL_STR, t: 'TEL' },
-      { cls: PILL_STR, t: 'LAM' },
-      { cls: PILL_PRES, t: 'AMAT' },
-    ],
-  },
-  {
-    icon: '📦',
-    name: 'Adv. Packaging',
-    sub: 'Bonding, TSV, RDL',
-    highlight: false,
-    pills: [
-      { cls: PILL_DOM, t: 'AMAT' },
-      { cls: PILL_STR, t: 'LAM' },
-      { cls: PILL_STR, t: 'TEL' },
-      { cls: PILL_PRES, t: 'KLA' },
-    ],
-  },
-];
-
-const crossProcess: { icon: string; title: string; desc: string; pills: Pill[] }[] = [
-  {
-    icon: '🔎',
-    title: 'Metrology & Inspection',
-    desc: 'CD-SEM, overlay, film, defect inspection — inline & offline',
-    pills: [
-      { cls: PILL_DOM, t: 'KLA' },
-      { cls: PILL_STR, t: 'AMAT' },
-      { cls: PILL_PRES, t: 'Hitachi HT' },
-      { cls: PILL_PRES, t: 'ASML' },
-      { cls: PILL_PRES, t: 'Onto' },
-    ],
-  },
-  {
-    icon: '🎭',
-    title: 'Photomask / Reticle',
-    desc: 'Mask writing, inspection, repair — supports lithography',
-    pills: [
-      { cls: PILL_DOM, t: 'KLA' },
-      { cls: PILL_STR, t: 'AMAT' },
-      { cls: PILL_PRES, t: 'Lasertec' },
-      { cls: PILL_PRES, t: 'NuFlare' },
-    ],
-  },
-  {
-    icon: '🌡️',
-    title: 'Rapid Thermal Processing',
-    desc: 'Annealing, activation — used after implant & deposition',
-    pills: [
-      { cls: PILL_DOM, t: 'AMAT' },
-      { cls: PILL_STR, t: 'SCREEN' },
-      { cls: PILL_PRES, t: 'TEL' },
-    ],
-  },
-  {
-    icon: '📐',
-    title: 'Wafer Test / Probing',
-    desc: 'Electrical test, wafer probers — end-of-line verification',
-    pills: [
-      { cls: PILL_DOM, t: 'TEL' },
-      { cls: PILL_STR, t: 'FormFactor' },
-    ],
-  },
-];
-
-const columns = [
-  'Litho',
-  'Coat/Dev',
-  'Etch',
-  'CVD',
-  'PVD',
-  'ALD',
-  'Epitaxy',
-  'Ion Impl.',
-  'CMP',
-  'Clean',
-  'Metrology',
-  'Photomask',
-  'Adv. Pkg',
-  'RTP',
-  'Wafer Test',
-];
-
-const heatmap: { vendor: string; color?: string; levels: HM[] }[] = [
-  {
-    vendor: 'ASML',
-    color: '#4f72ff',
-    levels: [
-      'dom',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'low',
-      'none',
-      'none',
-      'none',
-      'none',
-    ],
-  },
-  {
-    vendor: 'AMAT',
-    color: '#6b8cff',
-    levels: [
-      'none',
-      'none',
-      'str',
-      'dom',
-      'dom',
-      'mod',
-      'str',
-      'dom',
-      'dom',
-      'low',
-      'str',
-      'str',
-      'dom',
-      'dom',
-      'none',
-    ],
-  },
-  {
-    vendor: 'KLA',
-    color: '#3b5ee0',
-    levels: [
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'dom',
-      'dom',
-      'mod',
-      'none',
-      'none',
-    ],
-  },
-  {
-    vendor: 'LAM',
-    color: '#2a4acc',
-    levels: [
-      'none',
-      'none',
-      'dom',
-      'str',
-      'none',
-      'mod',
-      'none',
-      'none',
-      'none',
-      'str',
-      'low',
-      'none',
-      'str',
-      'none',
-      'none',
-    ],
-  },
-  {
-    vendor: 'TEL',
-    color: '#8aa4ff',
-    levels: [
-      'none',
-      'dom',
-      'str',
-      'str',
-      'mod',
-      'low',
-      'low',
-      'none',
-      'none',
-      'str',
-      'none',
-      'none',
-      'str',
-      'low',
-      'dom',
-    ],
-  },
-  {
-    vendor: 'ASMI',
-    color: '#aabeff',
-    levels: [
-      'none',
-      'none',
-      'none',
-      'mod',
-      'none',
-      'dom',
-      'dom',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-    ],
-  },
-  {
-    vendor: 'SCREEN',
-    levels: [
-      'none',
-      'low',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'dom',
-      'low',
-      'none',
-      'none',
-      'mod',
-      'none',
-    ],
-  },
-  {
-    vendor: 'Kokusai Electric',
-    levels: [
-      'none',
-      'none',
-      'none',
-      'mod',
-      'none',
-      'mod',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-    ],
-  },
-  {
-    vendor: 'Hitachi High-Tech',
-    levels: [
-      'none',
-      'none',
-      'mod',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'none',
-      'mod',
-      'none',
-      'none',
-      'none',
-      'none',
-    ],
-  },
-];
-
-const cellText: Record<HM, string> = { dom: '■■■■', str: '■■■', mod: '■■', low: '■', none: '—' };
-
-const chokepoints = [
-  {
-    accent: 'pv-accent-primary',
-    title: 'EUV / High-NA Lithography',
-    desc: 'ASML holds 100% monopoly on EUV scanners. No alternative supplier exists. Every sub-5nm chip requires ASML systems.',
-    pill: 'ASML ~100%',
-  },
-  {
-    accent: 'pv-accent-blue-400',
-    title: 'Coater / Developer (Tracks)',
-    desc: 'TEL commands ~92% of the global coater/developer market and ~100% of EUV track systems. Every wafer exposed on ASML EUV must pass through TEL tracks.',
-    pill: 'TEL ~92%',
-  },
-  {
-    accent: 'pv-accent-blue-300',
-    title: 'Single-Wafer ALD',
-    desc: 'ASM International holds >55% share in single-wafer ALD, critical for high-k/metal gate, GAA transistors and advanced patterning at sub-3nm nodes.',
-    pill: 'ASMI ~55%',
-  },
-  {
-    accent: 'pv-accent-indigo-600',
-    title: 'Process Control & Inspection',
-    desc: 'KLA dominates patterned wafer inspection, CD-SEM, overlay metrology, and reticle inspection with >50% share in process control overall.',
-    pill: 'KLA ~55%',
-  },
 ];
 ---
 
@@ -450,7 +72,7 @@ const chokepoints = [
                     </div>
                     <div class="px-2 pb-3 flex flex-wrap gap-1 justify-center">
                       {stage.pills.map((p) => (
-                        <span class={p.cls}>{p.t}</span>
+                        <span class={PILL[p.level]}>{p.t}</span>
                       ))}
                     </div>
                   </div>
@@ -478,7 +100,7 @@ const chokepoints = [
                   <div class="text-[10px] pv-muted-fg mb-2">{item.desc}</div>
                   <div class="flex flex-wrap gap-1">
                     {item.pills.map((p) => (
-                      <span class={p.cls}>{p.t}</span>
+                      <span class={PILL[p.level]}>{p.t}</span>
                     ))}
                   </div>
                 </div>
@@ -533,7 +155,7 @@ const chokepoints = [
         </div>
         {
           chokepoints.map((item) => (
-            <div class={`rounded-lg pv-choke ${item.accent} p-4`}>
+            <div class={`rounded-lg pv-choke ${ACCENT[item.accent]} p-4`}>
               <div class="text-sm font-bold mb-1">{item.title}</div>
               <div class="text-xs pv-muted-fg mb-2">{item.desc}</div>
               <span class={PILL_DOM}>{item.pill}</span>
