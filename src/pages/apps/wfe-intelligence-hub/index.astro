@@ -7,6 +7,7 @@ import AppHeader from '~/components/apps/AppHeader.astro';
 import PillNav from '~/components/apps/PillNav.astro';
 
 import Overview from '~/components/apps/wfe/Overview.astro';
+import Presence from '~/components/apps/wfe/Presence.astro';
 import Market from '~/components/apps/wfe/Market.astro';
 import Segments from '~/components/apps/wfe/Segments.astro';
 import Vendors from '~/components/apps/wfe/Vendors.astro';
@@ -26,6 +27,7 @@ const { Content } = await render(entry);
 
 const primary = [
   { id: 'overview', label: 'Overview', icon: 'tabler:layout-dashboard' },
+  { id: 'presence', label: 'Presence', icon: 'tabler:building-factory' },
   { id: 'market', label: 'Market', icon: 'tabler:chart-bar' },
   { id: 'segments', label: 'Segments', icon: 'tabler:chart-pie' },
   { id: 'vendors', label: 'Vendors', icon: 'tabler:building-factory-2' },
@@ -40,6 +42,7 @@ const more = [
 
 const viewTitle: Record<string, string> = {
   overview: 'Overview',
+  presence: 'Presence',
   market: 'Market',
   segments: 'Segments',
   vendors: 'Vendors',
@@ -115,6 +118,7 @@ const metadata = {
 
   <main class="app-main" id="main">
     <Overview />
+    <Presence />
     <Market />
     <Segments />
     <Vendors />

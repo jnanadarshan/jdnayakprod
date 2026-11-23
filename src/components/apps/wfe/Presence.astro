@@ -1,0 +1,696 @@
+---
+/**
+ * Presence tab, ported as-is from nanovision/src/app/wfe/page.tsx (PresenceTab).
+ * Same content, structure and styling. The shadcn tokens map onto the app's tokens:
+ * primary → ink (--app-text-1), accent-brand → blue, muted / border / card → app surfaces.
+ */
+
+type Pill = { cls: string; t: string };
+type HM = 'dom' | 'str' | 'mod' | 'low' | 'none';
+
+const PILL_DOM = 'pv-pill pv-pill-dom';
+const PILL_STR = 'pv-pill pv-pill-str';
+const PILL_PRES = 'pv-pill pv-pill-pres';
+
+const legend = [
+  { cls: 'pv-legend-dom', label: 'Dominant (>40% share)' },
+  { cls: 'bg-emerald-500/50', label: 'Strong (20–40%)' },
+  { cls: 'bg-amber-500/40', label: 'Moderate (10–20%)' },
+  { cls: 'pv-legend-pres', label: 'Present (<10%)' },
+];
+
+const stages: { icon: string; name: string; sub: string; highlight: boolean; pills: Pill[] }[] = [
+  {
+    icon: '🔩',
+    name: 'Wafer Prep & Epitaxy',
+    sub: 'Crystal growth, epi layers',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'ASMI' },
+      { cls: PILL_STR, t: 'AMAT' },
+      { cls: PILL_PRES, t: 'TEL' },
+    ],
+  },
+  {
+    icon: '🔥',
+    name: 'Oxidation & Diffusion',
+    sub: 'Thermal processing',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'TEL' },
+      { cls: PILL_STR, t: 'Kokusai' },
+      { cls: PILL_PRES, t: 'ASMI' },
+      { cls: PILL_PRES, t: 'AMAT' },
+    ],
+  },
+  {
+    icon: '🔬',
+    name: 'Lithography',
+    sub: 'Pattern exposure & coat/develop',
+    highlight: true,
+    pills: [
+      { cls: PILL_DOM, t: 'ASML' },
+      { cls: PILL_DOM, t: 'TEL' },
+      { cls: PILL_PRES, t: 'SCREEN' },
+    ],
+  },
+  {
+    icon: '⚡',
+    name: 'Etching',
+    sub: 'Plasma etch, ALE, RIE',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'LAM' },
+      { cls: PILL_STR, t: 'TEL' },
+      { cls: PILL_STR, t: 'AMAT' },
+      { cls: PILL_PRES, t: 'Hitachi HT' },
+    ],
+  },
+  {
+    icon: '🧪',
+    name: 'Deposition',
+    sub: 'CVD, PVD, ALD, ECD',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'AMAT' },
+      { cls: PILL_DOM, t: 'ASMI' },
+      { cls: PILL_STR, t: 'LAM' },
+      { cls: PILL_STR, t: 'TEL' },
+      { cls: PILL_PRES, t: 'Kokusai' },
+    ],
+  },
+  {
+    icon: '💠',
+    name: 'Ion Implantation',
+    sub: 'Doping & modification',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'AMAT' },
+      { cls: PILL_STR, t: 'Axcelis' },
+    ],
+  },
+  {
+    icon: '💎',
+    name: 'CMP',
+    sub: 'Planarization',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'AMAT' },
+      { cls: PILL_STR, t: 'Ebara' },
+    ],
+  },
+  {
+    icon: '🫧',
+    name: 'Cleaning',
+    sub: 'Wet clean, strip, surface prep',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'SCREEN' },
+      { cls: PILL_STR, t: 'TEL' },
+      { cls: PILL_STR, t: 'LAM' },
+      { cls: PILL_PRES, t: 'AMAT' },
+    ],
+  },
+  {
+    icon: '📦',
+    name: 'Adv. Packaging',
+    sub: 'Bonding, TSV, RDL',
+    highlight: false,
+    pills: [
+      { cls: PILL_DOM, t: 'AMAT' },
+      { cls: PILL_STR, t: 'LAM' },
+      { cls: PILL_STR, t: 'TEL' },
+      { cls: PILL_PRES, t: 'KLA' },
+    ],
+  },
+];
+
+const crossProcess: { icon: string; title: string; desc: string; pills: Pill[] }[] = [
+  {
+    icon: '🔎',
+    title: 'Metrology & Inspection',
+    desc: 'CD-SEM, overlay, film, defect inspection — inline & offline',
+    pills: [
+      { cls: PILL_DOM, t: 'KLA' },
+      { cls: PILL_STR, t: 'AMAT' },
+      { cls: PILL_PRES, t: 'Hitachi HT' },
+      { cls: PILL_PRES, t: 'ASML' },
+      { cls: PILL_PRES, t: 'Onto' },
+    ],
+  },
+  {
+    icon: '🎭',
+    title: 'Photomask / Reticle',
+    desc: 'Mask writing, inspection, repair — supports lithography',
+    pills: [
+      { cls: PILL_DOM, t: 'KLA' },
+      { cls: PILL_STR, t: 'AMAT' },
+      { cls: PILL_PRES, t: 'Lasertec' },
+      { cls: PILL_PRES, t: 'NuFlare' },
+    ],
+  },
+  {
+    icon: '🌡️',
+    title: 'Rapid Thermal Processing',
+    desc: 'Annealing, activation — used after implant & deposition',
+    pills: [
+      { cls: PILL_DOM, t: 'AMAT' },
+      { cls: PILL_STR, t: 'SCREEN' },
+      { cls: PILL_PRES, t: 'TEL' },
+    ],
+  },
+  {
+    icon: '📐',
+    title: 'Wafer Test / Probing',
+    desc: 'Electrical test, wafer probers — end-of-line verification',
+    pills: [
+      { cls: PILL_DOM, t: 'TEL' },
+      { cls: PILL_STR, t: 'FormFactor' },
+    ],
+  },
+];
+
+const columns = [
+  'Litho',
+  'Coat/Dev',
+  'Etch',
+  'CVD',
+  'PVD',
+  'ALD',
+  'Epitaxy',
+  'Ion Impl.',
+  'CMP',
+  'Clean',
+  'Metrology',
+  'Photomask',
+  'Adv. Pkg',
+  'RTP',
+  'Wafer Test',
+];
+
+const heatmap: { vendor: string; color?: string; levels: HM[] }[] = [
+  {
+    vendor: 'ASML',
+    color: '#4f72ff',
+    levels: [
+      'dom',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'low',
+      'none',
+      'none',
+      'none',
+      'none',
+    ],
+  },
+  {
+    vendor: 'AMAT',
+    color: '#6b8cff',
+    levels: [
+      'none',
+      'none',
+      'str',
+      'dom',
+      'dom',
+      'mod',
+      'str',
+      'dom',
+      'dom',
+      'low',
+      'str',
+      'str',
+      'dom',
+      'dom',
+      'none',
+    ],
+  },
+  {
+    vendor: 'KLA',
+    color: '#3b5ee0',
+    levels: [
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'dom',
+      'dom',
+      'mod',
+      'none',
+      'none',
+    ],
+  },
+  {
+    vendor: 'LAM',
+    color: '#2a4acc',
+    levels: [
+      'none',
+      'none',
+      'dom',
+      'str',
+      'none',
+      'mod',
+      'none',
+      'none',
+      'none',
+      'str',
+      'low',
+      'none',
+      'str',
+      'none',
+      'none',
+    ],
+  },
+  {
+    vendor: 'TEL',
+    color: '#8aa4ff',
+    levels: [
+      'none',
+      'dom',
+      'str',
+      'str',
+      'mod',
+      'low',
+      'low',
+      'none',
+      'none',
+      'str',
+      'none',
+      'none',
+      'str',
+      'low',
+      'dom',
+    ],
+  },
+  {
+    vendor: 'ASMI',
+    color: '#aabeff',
+    levels: [
+      'none',
+      'none',
+      'none',
+      'mod',
+      'none',
+      'dom',
+      'dom',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+    ],
+  },
+  {
+    vendor: 'SCREEN',
+    levels: [
+      'none',
+      'low',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'dom',
+      'low',
+      'none',
+      'none',
+      'mod',
+      'none',
+    ],
+  },
+  {
+    vendor: 'Kokusai Electric',
+    levels: [
+      'none',
+      'none',
+      'none',
+      'mod',
+      'none',
+      'mod',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+    ],
+  },
+  {
+    vendor: 'Hitachi High-Tech',
+    levels: [
+      'none',
+      'none',
+      'mod',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'none',
+      'mod',
+      'none',
+      'none',
+      'none',
+      'none',
+    ],
+  },
+];
+
+const cellText: Record<HM, string> = { dom: '■■■■', str: '■■■', mod: '■■', low: '■', none: '—' };
+
+const chokepoints = [
+  {
+    accent: 'pv-accent-primary',
+    title: 'EUV / High-NA Lithography',
+    desc: 'ASML holds 100% monopoly on EUV scanners. No alternative supplier exists. Every sub-5nm chip requires ASML systems.',
+    pill: 'ASML ~100%',
+  },
+  {
+    accent: 'pv-accent-blue-400',
+    title: 'Coater / Developer (Tracks)',
+    desc: 'TEL commands ~92% of the global coater/developer market and ~100% of EUV track systems. Every wafer exposed on ASML EUV must pass through TEL tracks.',
+    pill: 'TEL ~92%',
+  },
+  {
+    accent: 'pv-accent-blue-300',
+    title: 'Single-Wafer ALD',
+    desc: 'ASM International holds >55% share in single-wafer ALD, critical for high-k/metal gate, GAA transistors and advanced patterning at sub-3nm nodes.',
+    pill: 'ASMI ~55%',
+  },
+  {
+    accent: 'pv-accent-indigo-600',
+    title: 'Process Control & Inspection',
+    desc: 'KLA dominates patterned wafer inspection, CD-SEM, overlay metrology, and reticle inspection with >50% share in process control overall.',
+    pill: 'KLA ~55%',
+  },
+];
+---
+
+<section class="view" data-view="presence" data-title="Presence">
+  <div class="space-y-6 pv">
+    <div class="view-head" style="margin-bottom:0">
+      <h2 class="text-xl font-bold">Semiconductor Manufacturing Process Presence Map</h2>
+      <p class="text-sm pv-muted-fg mt-1 max-w-3xl">
+        Interactive mapping of WFE vendor dominance across the semiconductor manufacturing value chain.
+      </p>
+    </div>
+
+    {/* Legend */}
+    <div class="flex flex-wrap gap-3 items-center">
+      {
+        legend.map((l) => (
+          <div class="flex items-center gap-1.5 text-xs pv-muted-fg">
+            <span class={`inline-block h-2.5 w-2.5 rounded-sm ${l.cls}`} />
+            {l.label}
+          </div>
+        ))
+      }
+    </div>
+
+    {/* Value Chain */}
+    <div class="pv-card">
+      <div class="pv-card-header">
+        <h3 class="text-base font-semibold leading-none tracking-tight">
+          Semiconductor Manufacturing Process Value Chain
+        </h3>
+        <p class="text-xs pv-muted-fg">Front-End Wafer Fabrication Flow</p>
+      </div>
+      <div class="pv-card-content">
+        <div class="overflow-x-auto pb-2">
+          <div class="flex items-stretch min-w-[1100px]">
+            {
+              stages.map((stage, idx) => (
+                <div class="flex items-stretch">
+                  <div class:list={['pv-stage', stage.highlight && 'pv-stage-hl']}>
+                    <div class="px-3 pt-3 pb-2 text-center">
+                      <span class="text-2xl block mb-1">{stage.icon}</span>
+                      <div class="text-[11px] font-bold leading-tight">{stage.name}</div>
+                      <div class="text-[9px] pv-muted-fg mt-0.5">{stage.sub}</div>
+                    </div>
+                    <div class="px-2 pb-3 flex flex-wrap gap-1 justify-center">
+                      {stage.pills.map((p) => (
+                        <span class={p.cls}>{p.t}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div class="flex items-center pv-arrow text-lg flex-shrink-0 -mx-1 z-10">→</div>
+                  )}
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        {/* Cross-process band */}
+        <div class="mt-6">
+          <div class="text-[10px] font-bold uppercase tracking-widest pv-muted-fg-60 mb-3">
+            ⤵ Cross-Process &amp; Inline Steps (used across all stages)
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 pv-band rounded-xl">
+            {
+              crossProcess.map((item) => (
+                <div class="rounded-lg pv-mini p-3">
+                  <div class="text-xs font-bold mb-1">
+                    {item.icon} {item.title}
+                  </div>
+                  <div class="text-[10px] pv-muted-fg mb-2">{item.desc}</div>
+                  <div class="flex flex-wrap gap-1">
+                    {item.pills.map((p) => (
+                      <span class={p.cls}>{p.t}</span>
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Heatmap + Chokepoints */}
+    <div class="grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div class="pv-card min-w-0">
+        <div class="pv-card-header">
+          <h3 class="text-base font-semibold leading-none tracking-tight">Vendor × Process Presence Heatmap</h3>
+          <p class="text-xs pv-muted-fg">Dominance mapping across semiconductor manufacturing processes</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-[11px] pv-heatmap" style="min-width:900px">
+            <thead>
+              <tr>
+                <th class="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider min-w-[130px]">Vendor</th>
+                {columns.map((col) => <th class="px-2 py-2 text-center text-[9px] font-bold uppercase">{col}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                heatmap.map((row) => (
+                  <tr>
+                    <td
+                      class:list={['px-3 py-2', row.color ? 'font-semibold' : 'font-medium pv-muted-fg']}
+                      style={row.color ? `color:${row.color}` : undefined}
+                    >
+                      {row.vendor}
+                    </td>
+                    {row.levels.map((lv) => (
+                      <td class={`px-2 py-2 text-center text-[11px] pv-hm-${lv}`}>{cellText[lv]}</td>
+                    ))}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Critical Chokepoints */}
+      <div class="space-y-3">
+        <div>
+          <h3 class="text-base font-semibold">Critical Chokepoints</h3>
+          <p class="text-xs pv-muted-fg">Single-vendor dominant processes</p>
+        </div>
+        {
+          chokepoints.map((item) => (
+            <div class={`rounded-lg pv-choke ${item.accent} p-4`}>
+              <div class="text-sm font-bold mb-1">{item.title}</div>
+              <div class="text-xs pv-muted-fg mb-2">{item.desc}</div>
+              <span class={PILL_DOM}>{item.pill}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* nanovision shadcn tokens → app tokens */
+  .pv {
+    --pv-primary: var(--app-text-1);
+    --pv-accent: hsl(217 91% 60%);
+    --pv-muted: var(--app-surface-2);
+    --pv-muted-fg: var(--app-text-2);
+    --pv-border: var(--app-border);
+    --pv-card: var(--app-surface);
+    --pv-bg: var(--app-bg);
+  }
+  .pv-muted-fg {
+    color: var(--pv-muted-fg);
+  }
+  .pv-muted-fg-60 {
+    color: color-mix(in srgb, var(--pv-muted-fg) 60%, transparent);
+  }
+  .pv-arrow {
+    color: color-mix(in srgb, var(--pv-muted-fg) 40%, transparent);
+  }
+  .pv-card {
+    border-radius: 0.5rem;
+    border: 1px solid var(--pv-border);
+    background: var(--pv-card);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+  }
+  .pv-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1.5rem 1.5rem 0.5rem;
+  }
+  .pv-card-content {
+    padding: 0 1.5rem 1.5rem;
+  }
+  .pv-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 9px;
+    border: 1px solid;
+  }
+  .pv-pill-dom {
+    font-weight: 700;
+    background: color-mix(in srgb, var(--pv-primary) 20%, transparent);
+    color: var(--pv-primary);
+    border-color: color-mix(in srgb, var(--pv-primary) 30%, transparent);
+  }
+  .pv-pill-str {
+    font-weight: 700;
+    background: color-mix(in srgb, var(--pv-accent) 15%, transparent);
+    color: var(--pv-accent);
+    border-color: color-mix(in srgb, var(--pv-accent) 25%, transparent);
+  }
+  .pv-pill-pres {
+    font-weight: 500;
+    background: color-mix(in srgb, var(--pv-muted) 30%, transparent);
+    color: var(--pv-muted-fg);
+    border-color: var(--pv-border);
+  }
+  .pv-legend-dom {
+    background: color-mix(in srgb, var(--pv-primary) 50%, transparent);
+  }
+  .pv-legend-pres {
+    background: color-mix(in srgb, var(--pv-muted) 60%, transparent);
+    border: 1px solid var(--pv-border);
+  }
+  .pv-stage {
+    flex: 1;
+    width: 120px;
+    margin: 0 0.25rem;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid var(--pv-border);
+    background: linear-gradient(to bottom, var(--pv-card), var(--pv-bg));
+    transition: all 0.2s;
+  }
+  .pv-stage:hover {
+    transform: translateY(-0.25rem);
+    border-color: var(--pv-primary);
+  }
+  .pv-stage-hl {
+    border-color: color-mix(in srgb, var(--pv-primary) 30%, transparent);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--pv-primary) 5%, transparent), var(--pv-bg));
+  }
+  .pv-band {
+    border: 2px dashed var(--pv-border);
+    background: color-mix(in srgb, var(--pv-muted) 20%, transparent);
+  }
+  .pv-mini {
+    border: 1px solid var(--pv-border);
+    background: var(--pv-card);
+    transition: border-color 0.15s;
+  }
+  .pv-mini:hover {
+    border-color: var(--pv-primary);
+  }
+  .pv-heatmap th,
+  .pv-heatmap td {
+    border: 1px solid var(--pv-border);
+  }
+  .pv-heatmap th {
+    color: var(--pv-muted-fg);
+    background: color-mix(in srgb, var(--pv-muted) 30%, transparent);
+  }
+  .pv-heatmap tbody tr:hover {
+    background: color-mix(in srgb, var(--pv-muted) 30%, transparent);
+  }
+  .pv-hm-dom {
+    background: color-mix(in srgb, var(--pv-primary) 20%, transparent);
+    color: var(--pv-primary);
+    font-weight: 700;
+  }
+  .pv-hm-str {
+    background: color-mix(in srgb, var(--pv-accent) 10%, transparent);
+    color: var(--pv-accent);
+    font-weight: 600;
+  }
+  .pv-hm-mod {
+    background: var(--pv-muted);
+    color: var(--pv-muted-fg);
+  }
+  .pv-hm-low {
+    background: color-mix(in srgb, var(--pv-muted) 20%, transparent);
+    color: color-mix(in srgb, var(--pv-muted-fg) 60%, transparent);
+  }
+  .pv-hm-none {
+    color: color-mix(in srgb, var(--pv-muted-fg) 30%, transparent);
+  }
+  .pv-choke {
+    border: 1px solid var(--pv-border);
+    border-left-width: 4px;
+    background: var(--pv-card);
+  }
+  .pv-accent-primary {
+    border-left-color: var(--pv-primary);
+  }
+  /* Tailwind blue-400 / blue-300 / indigo-600 */
+  .pv-accent-blue-400 {
+    border-left-color: #60a5fa;
+  }
+  .pv-accent-blue-300 {
+    border-left-color: #93c5fd;
+  }
+  .pv-accent-indigo-600 {
+    border-left-color: #4f46e5;
+  }
+</style>
