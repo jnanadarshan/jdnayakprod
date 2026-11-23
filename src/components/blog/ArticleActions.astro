@@ -1,0 +1,180 @@
+---
+import { Icon } from 'astro-icon/components';
+import logo from '~/assets/images/logo.png';
+
+export interface Props {
+  title: string;
+  url: string | URL;
+  inline?: boolean;
+}
+const { title, url, inline = false } = Astro.props;
+const href = String(url);
+const enc = encodeURIComponent;
+const btn =
+  'article-action inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-muted dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 shadow-sm';
+const shares = [
+  { label: 'LinkedIn', icon: 'tabler:brand-linkedin', href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(href)}` },
+  { label: 'X', icon: 'tabler:brand-x', href: `https://twitter.com/intent/tweet?url=${enc(href)}&text=${enc(title)}` },
+  { label: 'Facebook', icon: 'tabler:brand-facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${enc(href)}` },
+  { label: 'WhatsApp', icon: 'tabler:brand-whatsapp', href: `https://wa.me/?text=${enc(title + ' ' + href)}` },
+];
+---
+
+<div
+  class:list={[
+    'article-actions no-print gap-2',
+    inline
+      ? 'flex flex-row justify-start max-w-3xl mx-auto px-4 sm:px-6 mt-3 mb-4 xl:hidden'
+      : 'hidden xl:flex xl:flex-col fixed top-28 left-[calc(50%+500px)] z-10',
+  ]}
+  data-title={title}
+  data-url={href}
+  data-logo={logo.src}
+>
+  <button type="button" class={btn} data-action="print" aria-label="Print" title="Print">
+    <Icon name="tabler:printer" class="w-4 h-4" />
+  </button>
+  <button type="button" class={btn} data-action="pdf" aria-label="Download PDF" title="Download PDF">
+    <Icon name="tabler:file-download" class="w-4 h-4" />
+  </button>
+  <div class="relative">
+    <button type="button" class={btn} data-action="share" aria-label="Share" title="Share" aria-expanded="false">
+      <Icon name="tabler:share" class="w-4 h-4" />
+    </button>
+    <div
+      data-share-menu
+      class="hidden absolute z-20 top-10 xl:top-0 left-0 xl:left-10 flex-col gap-1 p-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg min-w-[9rem]"
+    >
+      {
+        shares.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-gray-100 dark:hover:bg-slate-800"
+          >
+            <Icon name={s.icon} class="w-4 h-4" /> {s.label}
+          </a>
+        ))
+      }
+      <button type="button" data-action="copy" class="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-800">
+        <Icon name="tabler:link" class="w-4 h-4" /> <span>Copy link</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  @media print {
+    .no-print,
+    body > header,
+    #header,
+    footer {
+      display: none !important;
+    }
+    .print-brand {
+      display: flex !important;
+    }
+  }
+</style>
+
+<script>
+  function init() {
+    document.querySelectorAll<HTMLElement>('.article-actions').forEach(setup);
+  }
+
+  function setup(bar: HTMLElement) {
+    if (bar.dataset.ready) return;
+    bar.dataset.ready = '1';
+    const menu = bar.querySelector<HTMLElement>('[data-share-menu]')!;
+    const shareBtn = bar.querySelector<HTMLElement>('[data-action="share"]')!;
+    const title = bar.dataset.title || document.title;
+    const url = bar.dataset.url || location.href;
+
+    const toggle = (open: boolean) => {
+      menu.classList.toggle('hidden', !open);
+      menu.classList.toggle('flex', open);
+      shareBtn.setAttribute('aria-expanded', String(open));
+    };
+
+    bar.addEventListener('click', async (e) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
+      if (!el) return;
+      const action = el.dataset.action;
+      if (action === 'print') window.print();
+      else if (action === 'share') {
+        if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
+          try {
+            await navigator.share({ title, url });
+          } catch {}
+        } else toggle(menu.classList.contains('hidden'));
+      } else if (action === 'copy') {
+        try {
+          await navigator.clipboard.writeText(url);
+          el.querySelector('span')!.textContent = 'Copied!';
+          setTimeout(() => (el.querySelector('span')!.textContent = 'Copy link'), 1500);
+        } catch {}
+      } else if (action === 'pdf') {
+        el.setAttribute('disabled', 'true');
+        try {
+          await downloadPdf(bar, title);
+        } finally {
+          el.removeAttribute('disabled');
+        }
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!bar.contains(e.target as Node)) toggle(false);
+    });
+  }
+
+  function loadScript(src: string) {
+    return new Promise<void>((res, rej) => {
+      if ((window as any).html2pdf) return res();
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => res();
+      s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function downloadPdf(bar: HTMLElement, title: string) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+    const content = document.querySelector('article .prose');
+    if (!content) return;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'width:720px;padding:24px;background:#fff;color:#111;font-family:Georgia,serif;';
+    const head = document.createElement('div');
+    head.style.cssText = 'display:flex;align-items:center;gap:12px;border-bottom:2px solid #ddd;padding-bottom:12px;margin-bottom:20px;';
+    const img = document.createElement('img');
+    img.src = bar.dataset.logo || '';
+    img.style.cssText = 'width:44px;height:44px;border-radius:50%;';
+    const h = document.createElement('h1');
+    h.textContent = title;
+    h.style.cssText = 'font-size:24px;line-height:1.25;margin:0;font-weight:700;';
+    head.append(img, h);
+    const body = content.cloneNode(true) as HTMLElement;
+    body.classList.remove('dark:prose-invert');
+    body.style.cssText = 'max-width:none;color:#111;font-size:14px;';
+    body.querySelectorAll('img').forEach((i) => (i.crossOrigin = 'anonymous'));
+    wrap.append(head, body);
+    if (img.decode) await img.decode().catch(() => {});
+    const name = title.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'article';
+    await (window as any)
+      .html2pdf()
+      .set({
+        margin: [12, 12],
+        filename: `${name}.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['img', 'pre', 'table'] },
+      })
+      .from(wrap)
+      .save();
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

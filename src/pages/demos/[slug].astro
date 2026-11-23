@@ -1,14 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Layout from '~/layouts/PageLayout.astro';
 
 export async function getStaticPaths() {
   const demos = await getCollection('demos', ({ data }) => !data.draft);
-  return demos.map((demo) => ({ params: { slug: demo.slug }, props: { demo } }));
+  return demos.map((demo) => ({ params: { slug: demo.id }, props: { demo } }));
 }
 
 const { demo } = Astro.props;
-const { Content } = await demo.render();
+const { Content } = await render(demo);
 const { title, summary, embedUrl, demoUrl, repo, tags } = demo.data;
 const metadata = { title, description: summary };
 ---

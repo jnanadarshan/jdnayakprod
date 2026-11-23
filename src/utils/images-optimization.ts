@@ -223,9 +223,19 @@ export const astroAsseetsOptimizer: ImagesOptimizer = async (
     return [];
   }
 
+  // SVGs must be passed through as-is: Astro rejects rasterizing them unless format="svg" is explicit.
+  const srcPath = typeof image === 'string' ? image : image.src;
+  const isSvg = /\.svg(\?|#|$)/i.test(srcPath) || (typeof image !== 'string' && image.format === 'svg');
+  const outputFormat = isSvg ? 'svg' : format;
+
   return Promise.all(
     breakpoints.map(async (w: number) => {
-      const result = await getImage({ src: image, width: w, inferSize: true, ...(format ? { format: format } : {}) });
+      const result = await getImage({
+        src: image,
+        width: w,
+        inferSize: true,
+        ...(outputFormat ? { format: outputFormat } : {}),
+      });
 
       return {
         src: result?.src,

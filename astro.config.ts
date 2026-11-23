@@ -4,12 +4,13 @@ import { fileURLToPath } from 'url';
 import { defineConfig } from 'astro/config';
 
 import sitemap from '@astrojs/sitemap';
-import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import partytown from '@astrojs/partytown';
 import icon from 'astro-icon';
 import compress from 'astro-compress';
 import type { AstroIntegration } from 'astro';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 import astrowind from './vendor/integration';
 
@@ -25,9 +26,6 @@ export default defineConfig({
   output: 'static',
 
   integrations: [
-    tailwind({
-      applyBaseStyles: false,
-    }),
     sitemap(),
     mdx(),
     icon({
@@ -81,6 +79,11 @@ export default defineConfig({
   },
 
   vite: {
+    css: {
+      postcss: {
+        plugins: [tailwindcss(), autoprefixer()],
+      },
+    },
     resolve: {
       alias: {
         '~': path.resolve(__dirname, './src'),
