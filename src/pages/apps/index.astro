@@ -25,7 +25,7 @@ const labels = { mes: 'MES', analytics: 'Intelligence', '3d': '3D simulation', o
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {
         items.map(({ a, image }) => (
-          <a href={a.data.standalone ? `/apps/${a.id}/` : getPermalink(`/apps/${a.id}`)} class="block group">
+          <a href={getPermalink(`/apps/${a.id}`)} class="block group">
             {image && typeof image !== 'string' && (
               <Image src={image} alt={a.data.title} class="w-full h-auto rounded mb-4" widths={[400, 800]} sizes="400px" />
             )}
