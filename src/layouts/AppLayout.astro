@@ -25,9 +25,11 @@ import type { MetaData as MetaDataType } from '~/types';
 
 export interface Props {
   metadata?: MetaDataType;
+  /** Extra classes on the .app root, e.g. "app-full" for an edge-to-edge app. */
+  class?: string;
 }
 
-const { metadata = {} } = Astro.props;
+const { metadata = {}, class: className } = Astro.props;
 const { language, textDirection } = I18N;
 ---
 
@@ -63,7 +65,7 @@ const { language, textDirection } = I18N;
   </head>
 
   <body class="antialiased tracking-tight">
-    <div class="app">
+    <div class:list={['app', className]}>
       <slot />
     </div>
   </body>

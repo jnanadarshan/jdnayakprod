@@ -14,11 +14,20 @@
  *  Sort      select[data-sort=list] with option values "<key>:asc|desc" over data-s-<key>
  *  Export    button[data-export=list][data-filename] over visible items' data-csv (JSON array)
  *            and the list's data-csv-head (JSON array)
- *  Search    script#app-search-index (JSON [{type,title,sub,view,target?,open?}])
+ *  Search    script#app-search-index (JSON [{type,title,sub,view,target?,open?}]), re-read on every
+ *            open so apps can keep it current; choosing a result fires `app:search` (detail: item)
  *  Tooltip   any element with data-tip-title / data-tip-body
  */
 
-type SearchItem = { type: string; title: string; sub?: string; view: string; target?: string; open?: string };
+type SearchItem = {
+  type: string;
+  title: string;
+  sub?: string;
+  view: string;
+  target?: string;
+  open?: string;
+  [extra: string]: unknown;
+};
 
 const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<T>(sel);
 const $$ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) =>
@@ -300,7 +309,7 @@ for (const btn of $$('[data-export]')) {
 const searchDlg = $<HTMLDialogElement>('#app-search');
 const searchInput = $<HTMLInputElement>('#app-search-input');
 const searchList = $('#app-search-results');
-const index: SearchItem[] = JSON.parse($('#app-search-index')?.textContent ?? '[]');
+let index: SearchItem[] = [];
 let results: SearchItem[] = [];
 let sel = 0;
 
@@ -355,10 +364,12 @@ function choose(it: SearchItem) {
   searchDlg?.close();
   go(it.view, it.target);
   if (it.open) setTimeout(() => $<HTMLElement>(it.open!)?.click(), 60);
+  document.dispatchEvent(new CustomEvent('app:search', { detail: it }));
 }
 
 function openSearch() {
   if (!searchDlg || !searchInput) return;
+  index = JSON.parse($('#app-search-index')?.textContent ?? '[]');
   searchInput.value = '';
   renderResults();
   searchDlg.showModal();
@@ -392,3 +403,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 render(false);
+
+// A module (no exports) so apps can load it with a dynamic import() after preparing the page.
+export {};
