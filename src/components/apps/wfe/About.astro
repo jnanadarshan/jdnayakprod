@@ -69,6 +69,27 @@ const updated = new Date(`${meta.updated}-01T00:00:00Z`).toLocaleString('en', {
     </article>
 
     <article class="card span-2">
+      <h2 class="card-title">Data for AI assistants and developers</h2>
+      <p class="text-sm text-2 mt-1">
+        The whole dataset behind this hub is published in machine-readable form. Figures are the same approximations
+        shown here, so the same caveats apply.
+      </p>
+      <ul class="mt-3 grid gap-2 text-sm">
+        <li>
+          <a href="/apps/wfe-intelligence-hub/llms.txt" class="underline">llms.txt</a>: a guide for LLMs and agents.
+        </li>
+        <li>
+          <a href="/apps/wfe-intelligence-hub/llms-full.txt" class="underline">llms-full.txt</a>: every table as
+          Markdown.
+        </li>
+        <li>
+          <a href="/apps/wfe-intelligence-hub/data.json" class="underline">data.json</a>: the same data as JSON, with
+          stable ids.
+        </li>
+      </ul>
+    </article>
+
+    <article class="card span-2">
       <div class="flex items-start gap-3">
         <span class="app-brand-mark" aria-hidden="true"
           ><Icon name="tabler:device-mobile" width={18} height={18} /></span

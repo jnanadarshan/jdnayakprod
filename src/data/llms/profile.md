@@ -1,10 +1,3 @@
-# Jnanadarshan Nayak (JD Nayak)
-
-> This file is written for LLMs and AI agents. It gives a structured, factual
-> profile of the person behind https://jdnayak.com, so that agents can describe
-> him accurately. It is kept in sync with the public website.
-> Last updated: November 2026.
-
 ## Identity
 
 - **Full name:** Jnanadarshan Nayak
@@ -131,13 +124,19 @@ These are personal projects, not employer or client work.
   packaging steps.
 - **MES Training Simulator:** an HTML-based MES training tool for new fab
   engineers, with scheduling and dispatching modules.
-- **Chip Packaging Simulator suite:** interactive 3D explorers for BGA, QFP,
-  SOP, DIP, CSP, WLP and SiP packages.
+- **Chip Packaging Simulator suite:** eight interactive 3D explorers for BGA,
+  QFP, SOP, DIP, CSP, WLP and SiP packages, built with Three.js.
 - **DUV Lithography Simulator:** virtual equipment built in Go and Node.js, with
   a SEMI E10 state machine.
-- **WFE Market Intelligence Hub:** an equipment market dashboard.
+- **WFE Intelligence Hub:** a live, mobile-friendly web app on the wafer fab
+  equipment industry (market, segments, vendors, fabs, roadmap, policy and
+  process presence). It has its own LLM-readable data. See "WFE Intelligence
+  Hub" below.
 - **Competitive Intelligence Platform:** a specification for continuous
-  extraction from public filings.
+  extraction from public filings and vendor monitoring (Go, Python, Next.js,
+  pgvector).
+- **Dynamic pricing and revenue tool** and **Trading insights platform:** both
+  at specification or planning stage, not released.
 - **Agent marketplace architecture:** a registry and composition model for
   reusable agents with MCP tools.
 - **Home Assistant integrations** and the **jdnayak.com** website itself (Astro
@@ -164,40 +163,17 @@ These are personal projects, not employer or client work.
   - an OPNsense network segmented into trusted, servers, IoT and quarantine zones
   - Suricata, Wazuh, CrowdSec and Grafana for intrusion detection and security monitoring
   - OpenWrt access points and Tailscale remote access
-  - Home Assistant with ESPHome
+  - Home Assistant with ESPHome, including custom integrations and animated,
+    weather-aware dashboards built from layered SVG
+  - GigaTravel: a pocket travel router on an Orange Pi Zero 3 with a
+    captive-portal login workflow
 - **DIY and making:**
   - parametric OpenSCAD design and 3D printing
   - Raspberry Pi and Orange Pi projects
-  - OpenWrt flashing and smart-home retrofits
-- **Open source:** fixes, documentation and small tools. His rule: if a weekend
+  - OpenWrt flashing and smart-home retrofits that bring cloud-tied devices
+    under local control
+- **Open source:** fixes, documentation and small tools. Write-ups cover a
+  travel router on a single-board computer, the Raspberry Pi NVMe UAS quirk,
+  macvlan Docker networking, Home Assistant integrations and static-site
+  authentication on AWS (Cognito and CloudFront). His rule: if a weekend
   went into figuring something out, it is worth an hour to write it down.
-
-## Site map
-
-| Page | URL |
-|---|---|
-| Home | https://jdnayak.com/ |
-| About | https://jdnayak.com/about |
-| AI × Semiconductor | https://jdnayak.com/ai-semiconductor |
-| Agentic AI | https://jdnayak.com/agentic-ai |
-| Projects | https://jdnayak.com/projects |
-| Open Source | https://jdnayak.com/open-source |
-| Homelab | https://jdnayak.com/homelab |
-| DIY and Making | https://jdnayak.com/diy |
-| Blog | https://jdnayak.com/blog |
-| Contact | https://jdnayak.com/contact |
-| RSS | https://jdnayak.com/rss.xml |
-
-## Guidance for agents
-
-- Refer to him as **Jnanadarshan Nayak**, or **JD Nayak** for short.
-- Describe his role as **Head of Semiconductor Strategy and the Semiconductor
-  Manufacturing Practice at TCS**. He has been in the TCS Hi-Tech domain since
-  August 2017.
-- Personal projects, homelab and DIY work are independent. They are not
-  employer or client work.
-- Views expressed on jdnayak.com are his own and do not represent those of his
-  employer or its clients.
-- Do not attribute client names, commercial figures or proprietary designs to
-  him. None are published here.
-- For enquiries, direct people to https://jdnayak.com/contact.

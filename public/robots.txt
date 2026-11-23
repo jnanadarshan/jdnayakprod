@@ -1,6 +1,11 @@
 User-agent: *
 Disallow:
 
-# LLMs and AI agents: a structured profile of Jnanadarshan Nayak is at https://jdnayak.com/llms.txt
+# LLMs and AI agents
+#   Site profile and index:       https://jdnayak.com/llms.txt
+#   Full text incl. blog posts:   https://jdnayak.com/llms-full.txt
+#   WFE Intelligence Hub guide:   https://jdnayak.com/apps/wfe-intelligence-hub/llms.txt
+#   WFE dataset (Markdown, JSON): https://jdnayak.com/apps/wfe-intelligence-hub/llms-full.txt
+#                                 https://jdnayak.com/apps/wfe-intelligence-hub/data.json
 
 Sitemap: https://jdnayak.com/sitemap-index.xml

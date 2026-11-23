@@ -19,7 +19,8 @@ import Explorer from '~/components/apps/wfe/Explorer.astro';
 import About from '~/components/apps/wfe/About.astro';
 import { slug } from '~/components/apps/wfe/format';
 
-import { segments, vendors, fabs, roadmap, policy, process, glossary } from '~/data/wfe';
+import { segments, vendors, fabs, roadmap, policy, process, glossary, meta as wfeMeta } from '~/data/wfe';
+import { WFE_URLS } from '~/utils/llms-wfe';
 
 const entry = await getEntry('apps', 'wfe-intelligence-hub');
 if (!entry) throw new Error('Missing src/content/apps/wfe-intelligence-hub.md');
@@ -111,9 +112,47 @@ const metadata = {
   title: entry.data.title,
   description: entry.data.summary,
 };
+
+// Structured data for search engines and LLM crawlers: describes the dataset and where to download it.
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'WFE Intelligence Hub dataset',
+  description:
+    'Wafer fab equipment industry data: market size, segments, vendors, process presence, fabs, technology roadmap and policy. Approximate figures compiled from public sources.',
+  url: WFE_URLS.app,
+  creator: { '@type': 'Person', name: 'Jnanadarshan Nayak', url: 'https://jdnayak.com' },
+  dateModified: wfeMeta.updated,
+  keywords: ['wafer fab equipment', 'WFE', 'semiconductor equipment', 'ASML', 'fab tracker', 'export controls'],
+  distribution: [
+    { '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: WFE_URLS.json },
+    { '@type': 'DataDownload', encodingFormat: 'text/markdown', contentUrl: WFE_URLS.llmsFull },
+  ],
+};
 ---
 
 <AppLayout metadata={metadata}>
+  <Fragment slot="head">
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/apps/wfe-intelligence-hub/llms.txt"
+      title="WFE Intelligence Hub: guide for LLMs"
+    />
+    <link
+      rel="alternate"
+      type="text/markdown"
+      href="/apps/wfe-intelligence-hub/llms-full.txt"
+      title="WFE dataset (Markdown)"
+    />
+    <link
+      rel="alternate"
+      type="application/json"
+      href="/apps/wfe-intelligence-hub/data.json"
+      title="WFE dataset (JSON)"
+    />
+    <script type="application/ld+json" set:html={JSON.stringify(datasetLd)} />
+  </Fragment>
   <AppHeader title="WFE Intelligence Hub" subtitle="Overview" icon="tabler:cpu" search />
 
   <main class="app-main" id="main">
