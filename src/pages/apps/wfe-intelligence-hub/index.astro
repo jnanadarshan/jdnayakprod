@@ -1,0 +1,168 @@
+---
+import { getEntry, render } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+import AppLayout from '~/layouts/AppLayout.astro';
+import AppHeader from '~/components/apps/AppHeader.astro';
+import PillNav from '~/components/apps/PillNav.astro';
+
+import Overview from '~/components/apps/wfe/Overview.astro';
+import Market from '~/components/apps/wfe/Market.astro';
+import Segments from '~/components/apps/wfe/Segments.astro';
+import Vendors from '~/components/apps/wfe/Vendors.astro';
+import VendorSheet from '~/components/apps/wfe/VendorSheet.astro';
+import Fabs from '~/components/apps/wfe/Fabs.astro';
+import Roadmap from '~/components/apps/wfe/Roadmap.astro';
+import Policy from '~/components/apps/wfe/Policy.astro';
+import Explorer from '~/components/apps/wfe/Explorer.astro';
+import About from '~/components/apps/wfe/About.astro';
+import { slug } from '~/components/apps/wfe/format';
+
+import { segments, vendors, fabs, roadmap, policy, process, glossary } from '~/data/wfe';
+
+const entry = await getEntry('apps', 'wfe-intelligence-hub');
+if (!entry) throw new Error('Missing src/content/apps/wfe-intelligence-hub.md');
+const { Content } = await render(entry);
+
+const primary = [
+  { id: 'overview', label: 'Overview', icon: 'tabler:layout-dashboard' },
+  { id: 'market', label: 'Market', icon: 'tabler:chart-bar' },
+  { id: 'segments', label: 'Segments', icon: 'tabler:chart-pie' },
+  { id: 'vendors', label: 'Vendors', icon: 'tabler:building-factory-2' },
+  { id: 'fabs', label: 'Fabs', icon: 'tabler:map-pin' },
+  { id: 'roadmap', label: 'Roadmap', icon: 'tabler:route' },
+];
+const more = [
+  { id: 'policy', label: 'Policy', icon: 'tabler:gavel' },
+  { id: 'explorer', label: 'Process explorer', icon: 'tabler:topology-star-3' },
+  { id: 'about', label: 'About & sources', icon: 'tabler:info-circle' },
+];
+
+const viewTitle: Record<string, string> = {
+  overview: 'Overview',
+  market: 'Market',
+  segments: 'Segments',
+  vendors: 'Vendors',
+  fabs: 'Fab tracker',
+  roadmap: 'Roadmap',
+  policy: 'Policy',
+  explorer: 'Process explorer',
+  about: 'About & sources',
+};
+
+const searchIndex = [
+  ...[...primary, ...more].map((v) => ({ type: 'View', title: viewTitle[v.id], view: v.id })),
+  ...segments.map((s) => ({
+    type: 'Segment',
+    title: s.name,
+    sub: s.subsegments.join(' · '),
+    view: 'segments',
+    target: `seg-${s.id}`,
+  })),
+  ...vendors.map((v) => ({
+    type: 'Vendor',
+    title: v.name,
+    sub: `${v.hq} · ${v.ticker} · ${v.products.join(', ')}`,
+    view: 'vendors',
+    target: `vendor-${v.id}`,
+    open: `[data-vendor-card="${v.id}"]`,
+  })),
+  ...fabs.map((f) => ({
+    type: 'Fab',
+    title: `${f.company}: ${f.site}`,
+    sub: `${f.region} · ${f.node} · ${f.status}`,
+    view: 'fabs',
+    target: `fab-${f.id}`,
+  })),
+  ...roadmap.map((r, i) => ({
+    type: 'Roadmap',
+    title: r.title,
+    sub: `${r.year} · ${r.area}`,
+    view: 'roadmap',
+    target: `rm-${i}`,
+  })),
+  ...policy.map((p, i) => ({
+    type: 'Policy',
+    title: p.title,
+    sub: `${p.date} · ${p.region} · ${p.kind}`,
+    view: 'policy',
+    target: `pol-${i}`,
+  })),
+  ...process.map((p) => ({
+    type: 'Process',
+    title: p.step,
+    sub: p.tools.map((t) => t.name).join(' · '),
+    view: 'explorer',
+    target: `proc-${p.id}`,
+  })),
+  ...glossary.map((g) => ({
+    type: 'Glossary',
+    title: g.term,
+    sub: g.def,
+    view: 'explorer',
+    target: `gl-${slug(g.term)}`,
+  })),
+];
+
+const metadata = {
+  title: entry.data.title,
+  description: entry.data.summary,
+};
+---
+
+<AppLayout metadata={metadata}>
+  <AppHeader title="WFE Intelligence Hub" subtitle="Overview" icon="tabler:cpu" search />
+
+  <main class="app-main" id="main">
+    <Overview />
+    <Market />
+    <Segments />
+    <Vendors />
+    <Fabs />
+    <Roadmap />
+    <Policy />
+    <Explorer />
+    <About><Content /></About>
+  </main>
+
+  <PillNav
+    items={primary}
+    more={more}
+    links={[
+      { href: '/apps', label: 'All apps', icon: 'tabler:apps' },
+      { href: '/', label: 'jdnayak.com', icon: 'tabler:home' },
+    ]}
+  />
+
+  <VendorSheet />
+
+  <dialog class="search-dialog" id="app-search" aria-label="Search the hub">
+    <div class="search-input-row">
+      <Icon name="tabler:search" />
+      <input
+        id="app-search-input"
+        type="search"
+        placeholder="Search vendors, fabs, segments, terms…"
+        autocomplete="off"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="app-search-results"
+      />
+      <button type="button" class="app-icon-btn" data-sheet-close aria-label="Close search"
+        ><Icon name="tabler:x" /></button
+      >
+    </div>
+    <div class="search-results" id="app-search-results" role="listbox"></div>
+    <p class="search-hint">↑ ↓ to move · Enter to open · Esc to close</p>
+  </dialog>
+
+  <script
+    type="application/json"
+    id="app-search-index"
+    set:html={JSON.stringify(searchIndex).replace(/</g, '\\u003c')}
+  />
+
+  <script>
+    import '~/scripts/apps/shell';
+  </script>
+</AppLayout>

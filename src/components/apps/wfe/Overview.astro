@@ -1,0 +1,159 @@
+---
+import { Icon } from 'astro-icon/components';
+import ColumnChart from '~/components/apps/charts/ColumnChart.astro';
+import BarList from '~/components/apps/charts/BarList.astro';
+import SegBar from '~/components/apps/charts/SegBar.astro';
+import { annual, regions, deviceMix, segments, fabs, marketDrivers, meta, latestActual, segmentSize } from '~/data/wfe';
+import { usdB, pct, signedPct } from './format';
+
+const prev = annual[annual.indexOf(latestActual) - 1];
+const last = annual.at(-1)!;
+const lastPrev = annual.at(-2)!;
+const regionTotal = regions.reduce((s, r) => s + r.value, 0);
+const china = regions.find((r) => r.id === 'china')!;
+const building = fabs.filter((f) => ['Construction', 'Pilot', 'Ramping'].includes(f.status)).length;
+
+const columns = annual.map((p, i) => ({
+  label: p.estimate ? `${String(p.year).slice(2)}E` : `'${String(p.year).slice(2)}`,
+  value: p.value,
+  estimate: p.estimate,
+  showValue: p === latestActual || i === annual.length - 1,
+  pin: true,
+  tipTitle: `${p.year}${p.estimate ? ' (estimate)' : ''}`,
+  tipBody: `${usdB(p.value)}${i ? ` · ${signedPct((p.value / annual[i - 1].value - 1) * 100)} YoY` : ''}`,
+}));
+const sortedSegments = [...segments].sort((a, b) => b.share - a.share);
+---
+
+<section class="view" data-view="overview" data-title="Overview">
+  <div class="view-head">
+    <p class="view-eyebrow">Wafer fab equipment</p>
+    <h1 class="view-title">WFE Intelligence Hub</h1>
+    <p class="view-lede">
+      Market, segments, vendors, fab projects, technology roadmap and policy for the roughly {usdB(latestActual.value)} wafer
+      fab equipment industry, in one place.
+    </p>
+  </div>
+
+  <div class="stack">
+    <div class="grid-auto" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr))">
+      <div class="card stat">
+        <p class="stat-label">WFE spend {latestActual.year}</p>
+        <p class="stat-value">{usdB(latestActual.value)}</p>
+        <p class="stat-note">
+          <span class="delta-up">{signedPct((latestActual.value / prev.value - 1) * 100)}</span> vs {prev.year}
+        </p>
+      </div>
+      <div class="card stat">
+        <p class="stat-label">{last.year} estimate</p>
+        <p class="stat-value">{usdB(last.value)}</p>
+        <p class="stat-note">
+          <span class="delta-up">{signedPct((last.value / lastPrev.value - 1) * 100)}</span> vs {lastPrev.year}E
+        </p>
+      </div>
+      <div class="card stat">
+        <p class="stat-label">China share of spend</p>
+        <p class="stat-value">{pct((china.value / regionTotal) * 100)}</p>
+        <p class="stat-note">Largest region, {latestActual.year}</p>
+      </div>
+      <div class="card stat">
+        <p class="stat-label">Fab projects tracked</p>
+        <p class="stat-value">{fabs.length}</p>
+        <p class="stat-note">{building} building or ramping</p>
+      </div>
+    </div>
+
+    <div class="notice">
+      <Icon name="tabler:info-circle" />
+      <span>{meta.disclaimer} <a href="#about" class="underline">Sources</a></span>
+    </div>
+
+    <div class="grid-2">
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">WFE spend by year</h2>
+            <p class="card-sub">USD billions · hatched bars are estimates</p>
+          </div>
+          <a href="#market" class="badge badge-primary">Market <Icon name="tabler:arrow-right" /></a>
+        </div>
+        <ColumnChart columns={columns} format={usdB} ariaLabel="Annual WFE spend, 2016 to 2026" />
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Spend by segment</h2>
+            <p class="card-sub">Share of {latestActual.year} WFE</p>
+          </div>
+          <a href="#segments" class="badge badge-primary">Segments <Icon name="tabler:arrow-right" /></a>
+        </div>
+        <BarList
+          ariaLabel="Share of WFE by equipment segment"
+          rows={sortedSegments.map((s) => ({
+            label: s.name,
+            value: s.share,
+            display: pct(s.share),
+            tipBody: `${pct(s.share)} · ≈ ${usdB(segmentSize(s))}`,
+            href: '#segments',
+            attrs: { 'data-goto-target': `seg-${s.id}` },
+          }))}
+        />
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Where tools ship</h2>
+            <p class="card-sub">Equipment billings by region, {latestActual.year}, USD billions</p>
+          </div>
+        </div>
+        <BarList
+          ariaLabel="Equipment billings by region"
+          rows={regions.map((r) => ({
+            label: r.label,
+            value: r.value,
+            display: usdB(r.value),
+            tipBody: `${usdB(r.value)} · ${pct((r.value / regionTotal) * 100)} of total`,
+          }))}
+        />
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Spend by device</h2>
+            <p class="card-sub">Share of {latestActual.year} WFE</p>
+          </div>
+        </div>
+        <SegBar
+          ariaLabel="WFE by end device"
+          parts={deviceMix.map((d) => ({ label: d.label, value: d.share, display: pct(d.share) }))}
+        />
+        <ul class="mt-5 grid gap-3">
+          {
+            marketDrivers.slice(0, 2).map((d) => (
+              <li class="text-sm">
+                <p class="font-semibold">{d.title}</p>
+                <p class="text-2 mt-0.5">{d.body}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </article>
+    </div>
+
+    <h2 class="text-lg font-bold mt-4">Key signals</h2>
+    <div class="grid-auto">
+      {
+        marketDrivers.map((d, i) => (
+          <article class="card">
+            <p class="badge badge-primary">Signal {i + 1}</p>
+            <h3 class="card-title mt-3">{d.title}</h3>
+            <p class="text-sm text-2 mt-1.5">{d.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

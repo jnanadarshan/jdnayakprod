@@ -1,0 +1,183 @@
+---
+/**
+ * Single-series column chart in HTML/CSS: text stays at its real size on any screen.
+ * Estimates are drawn in a lighter step with a hatch so they never read as actuals.
+ */
+export interface Column {
+  label: string;
+  value: number;
+  estimate?: boolean;
+  /** Show the value on the cap (keep it selective). */
+  showValue?: boolean;
+  /** Keep the cap value on narrow screens too (others hide below 640px). */
+  pin?: boolean;
+  tipTitle?: string;
+  tipBody?: string;
+  /** Small secondary line under the axis label (e.g. YoY). */
+  note?: string;
+}
+
+export interface Props {
+  columns: Column[];
+  format?: (v: number) => string;
+  height?: number;
+  ticks?: number;
+  ariaLabel: string;
+}
+
+const { columns, format = (v: number) => String(v), height = 210, ticks = 4, ariaLabel } = Astro.props;
+
+const rawMax = Math.max(...columns.map((c) => c.value));
+const step = (() => {
+  const s = rawMax / ticks;
+  const mag = 10 ** Math.floor(Math.log10(s));
+  const n = s / mag;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+})();
+const max = step * Math.ceil(rawMax / step);
+const tickValues = Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step);
+---
+
+<div class="col-chart" role="img" aria-label={ariaLabel} style={`--plot-h:${height}px`}>
+  <div class="col-plot">
+    {
+      tickValues.map((t) => (
+        <div class="col-grid" style={`bottom:${(t / max) * 100}%`}>
+          <span>{format(t)}</span>
+        </div>
+      ))
+    }
+    <div class="col-bars">
+      {
+        columns.map((c) => (
+          <div
+            class="col"
+            tabindex="0"
+            data-tip-title={c.tipTitle ?? c.label}
+            data-tip-body={c.tipBody ?? format(c.value)}
+          >
+            <div class="col-stack" style={`height:${(c.value / max) * 100}%`}>
+              {c.showValue && <span class:list={['col-value', !c.pin && 'col-value-minor']}>{format(c.value)}</span>}
+              <div class={c.estimate ? 'col-bar est' : 'col-bar'} />
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="col-axis">
+    {
+      columns.map((c) => (
+        <div class="col-x">
+          <span>{c.label}</span>
+          {c.note && <small>{c.note}</small>}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .col-chart {
+    --gutter: 34px;
+    font-variant-numeric: tabular-nums;
+  }
+  .col-plot {
+    position: relative;
+    height: var(--plot-h);
+    margin-left: var(--gutter);
+    margin-top: 22px;
+  }
+  .col-grid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 1px solid var(--grid);
+  }
+  .col-grid span {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: -8px;
+    font-size: 11px;
+    color: var(--app-text-3);
+    white-space: nowrap;
+  }
+  .col-bars {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+  }
+  .col {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    border-radius: 6px;
+    outline-offset: -2px;
+  }
+  .col:hover,
+  .col:focus-visible {
+    background: var(--app-primary-softer);
+  }
+  .col-stack {
+    position: relative;
+    width: min(24px, 62%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .col-bar {
+    flex: 1;
+    border-radius: 4px 4px 0 0;
+    background: var(--series-1);
+  }
+  .col-bar.est {
+    background:
+      repeating-linear-gradient(135deg, var(--seq-light) 0 4px, transparent 4px 7px), var(--app-primary-softer);
+    box-shadow: inset 0 0 0 1.5px var(--seq-light);
+  }
+  .col-value {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--app-text-1);
+    white-space: nowrap;
+  }
+  .col-axis {
+    display: flex;
+    margin-left: var(--gutter);
+    margin-top: 6px;
+  }
+  .col-x {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--app-text-3);
+    line-height: 1.3;
+  }
+  .col-x small {
+    display: block;
+    font-size: 10px;
+  }
+  @media (max-width: 639px) {
+    .col-value-minor {
+      display: none;
+    }
+  }
+  @media (max-width: 520px) {
+    .col-x span,
+    .col-x small {
+      font-size: 9.5px;
+    }
+    .col-x small {
+      display: none;
+    }
+  }
+</style>

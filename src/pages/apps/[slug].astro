@@ -3,19 +3,20 @@ import { getCollection, render } from 'astro:content';
 import Layout from '~/layouts/PageLayout.astro';
 
 export async function getStaticPaths() {
-  const demos = await getCollection('demos', ({ data }) => !data.draft);
-  return demos.map((demo) => ({ params: { slug: demo.id }, props: { demo } }));
+  // Standalone apps render their own page at src/pages/apps/<id>/.
+  const apps = await getCollection('apps', ({ data }) => !data.draft && !data.standalone);
+  return apps.map((app) => ({ params: { slug: app.id }, props: { app } }));
 }
 
-const { demo } = Astro.props;
-const { Content } = await render(demo);
-const { title, summary, embedUrl, demoUrl, repo, tags } = demo.data;
+const { app } = Astro.props;
+const { Content } = await render(app);
+const { title, summary, embedUrl, appUrl, repo, tags } = app.data;
 const metadata = { title, description: summary };
 ---
 
 <Layout metadata={metadata}>
   <section class="mx-auto max-w-4xl px-4 sm:px-6 py-12">
-    <p class="text-sm text-muted"><a href="/demos" class="underline">← All demos</a></p>
+    <p class="text-sm text-muted"><a href="/apps" class="underline">← All apps</a></p>
     <h1 class="text-4xl font-bold font-heading mt-2">{title}</h1>
     <p class="mt-3 text-lg">{summary}</p>
     {tags && <p class="mt-2 text-sm text-muted">{tags.join(' · ')}</p>}
@@ -26,7 +27,7 @@ const metadata = { title, description: summary };
       )
     }
     <div class="mt-6 flex gap-4">
-      {demoUrl && <a href={demoUrl} class="btn-primary underline">Open demo</a>}
+      {appUrl && <a href={appUrl} class="btn-primary underline">Open app</a>}
       {repo && <a href={repo} class="underline">Source</a>}
     </div>
 

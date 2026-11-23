@@ -1,0 +1,63 @@
+---
+/**
+ * Full-screen shell for everything under /apps/<app>/.
+ *
+ * PWA-ready: one manifest scoped to /apps/ (public/apps/manifest.webmanifest) so the whole Apps
+ * section installs as a single app, viewport-fit=cover with safe-area insets, theme-color for
+ * both color schemes, and standalone-mode styles. To make it work offline later, add
+ * public/apps/sw.js (scope /apps/) and register it in the script below.
+ *
+ * No site header/footer and no View Transitions router: each app owns the whole viewport.
+ */
+import '~/assets/styles/tailwind.css';
+import '~/assets/styles/apps.css';
+
+import { I18N } from 'astrowind:config';
+
+import Favicons from '~/components/Favicons.astro';
+import CustomStyles from '~/components/CustomStyles.astro';
+import ApplyColorMode from '~/components/common/ApplyColorMode.astro';
+import Metadata from '~/components/common/Metadata.astro';
+import SiteVerification from '~/components/common/SiteVerification.astro';
+import Analytics from '~/components/common/Analytics.astro';
+
+import type { MetaData as MetaDataType } from '~/types';
+
+export interface Props {
+  metadata?: MetaDataType;
+}
+
+const { metadata = {} } = Astro.props;
+const { language, textDirection } = I18N;
+---
+
+<!doctype html>
+<html lang={language} dir={textDirection}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#030620" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Apps" />
+    <link rel="manifest" href="/apps/manifest.webmanifest" />
+    <Favicons />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apps/icons/icon-180.png" />
+    <CustomStyles />
+    <ApplyColorMode />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+    <Metadata {...metadata} />
+    <SiteVerification />
+    <Analytics />
+  </head>
+
+  <body class="antialiased tracking-tight">
+    <div class="app">
+      <slot />
+    </div>
+  </body>
+</html>

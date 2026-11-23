@@ -1,0 +1,84 @@
+---
+import { Icon } from 'astro-icon/components';
+import VendorChip from './VendorChip.astro';
+import { process, glossary, segmentById } from '~/data/wfe';
+import { slug } from './format';
+---
+
+<section class="view" data-view="explorer" data-title="Process explorer">
+  <div class="view-head">
+    <p class="view-eyebrow">Process explorer</p>
+    <h1 class="view-title">From bare wafer to finished die</h1>
+    <p class="view-lede">
+      The main front-end process modules, the tools each one uses and who makes them. A modern logic flow repeats these
+      loops hundreds of times.
+    </p>
+  </div>
+
+  <div class="stack">
+    <ol class="grid-2">
+      {
+        process.map((p, i) => (
+          <li class="card" id={`proc-${p.id}`}>
+            <div class="flex items-start gap-3">
+              <span class="app-brand-mark text-sm font-bold" style="width:34px;height:34px" aria-hidden="true">
+                {i + 1}
+              </span>
+              <div class="min-w-0 flex-1">
+                <h2 class="card-title text-base">{p.step}</h2>
+                <p class="text-sm text-2 mt-0.5">{p.purpose}</p>
+              </div>
+            </div>
+            <div class="mt-4 grid gap-3">
+              {p.tools.map((t) => (
+                <div>
+                  <p class="text-sm font-semibold">{t.name}</p>
+                  <div class="flex flex-wrap gap-1.5 mt-1.5">
+                    {t.vendors.map((v) => (
+                      <VendorChip id={v} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div class="notice mt-4">
+              <Icon name="tabler:sparkles" />
+              <span>
+                <strong>At the leading edge:</strong> {p.edge}
+              </span>
+            </div>
+            <a href="#segments" data-goto-target={`seg-${p.segment}`} class="btn-ghost mt-4">
+              {segmentById.get(p.segment)?.name} segment <Icon name="tabler:arrow-right" />
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <article class="card mt-2" id="glossary">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Glossary</h2>
+          <p class="card-sub">{glossary.length} terms used across the hub</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <label class="field">
+          <Icon name="tabler:search" />
+          <input type="search" placeholder="Filter terms…" data-filter-search="glossary" aria-label="Filter glossary" />
+        </label>
+      </div>
+      <dl class="grid gap-x-8 gap-y-4 md:grid-cols-2" data-filterable="glossary">
+        {
+          glossary.map((g) => (
+            <div id={`gl-${slug(g.term)}`} data-item data-search={`${g.term} ${g.def}`} class="rounded-lg">
+              <dt class="font-semibold text-sm">{g.term}</dt>
+              <dd class="text-sm text-2 mt-0.5">{g.def}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="empty" data-filter-empty="glossary" hidden>No terms match.</p>
+    </article>
+  </div>
+</section>

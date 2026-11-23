@@ -66,24 +66,26 @@ const postCollection = defineCollection({
   }),
 });
 
-const demosCollection = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/demos' }),
+const appsCollection = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/apps' }),
   schema: z.object({
     title: z.string(),
     summary: z.string(),
-    type: z.enum(['mes', '3d', 'other']).default('other'),
+    type: z.enum(['mes', 'analytics', '3d', 'other']).default('other'),
     status: z.enum(['live', 'prototype', 'planned']).default('prototype'),
     order: z.number().default(100),
     draft: z.boolean().optional(),
     image: z.string().optional(),
     tags: z.array(z.string()).optional(),
-    demoUrl: z.string().url().optional(),
+    appUrl: z.string().url().optional(),
     embedUrl: z.string().url().optional(),
     repo: z.string().url().optional(),
+    // Has its own full-screen page at src/pages/apps/<id>/; the generic detail page is skipped.
+    standalone: z.boolean().default(false),
   }),
 });
 
 export const collections = {
   post: postCollection,
-  demos: demosCollection,
+  apps: appsCollection,
 };

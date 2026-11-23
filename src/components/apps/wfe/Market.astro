@@ -1,0 +1,167 @@
+---
+import ColumnChart from '~/components/apps/charts/ColumnChart.astro';
+import BarList from '~/components/apps/charts/BarList.astro';
+import SegBar from '~/components/apps/charts/SegBar.astro';
+import { annual, regions, deviceMix, marketDrivers, latestActual } from '~/data/wfe';
+import { usdB, pct, signedPct } from './format';
+
+const first = annual[0];
+const years = latestActual.year - first.year;
+const cagr = ((latestActual.value / first.value) ** (1 / years) - 1) * 100;
+const yoy = annual.map((p, i) => (i ? (p.value / annual[i - 1].value - 1) * 100 : null));
+const best = yoy.reduce<number>((bi, v, i) => (v !== null && v > (yoy[bi] ?? -Infinity) ? i : bi), 1);
+const worst = yoy.reduce<number>((wi, v, i) => (v !== null && v < (yoy[wi] ?? Infinity) ? i : wi), 1);
+const regionTotal = regions.reduce((s, r) => s + r.value, 0);
+
+const columns = annual.map((p, i) => ({
+  label: p.estimate ? `${p.year}E` : String(p.year),
+  value: p.value,
+  estimate: p.estimate,
+  showValue: true,
+  pin: p === latestActual || i === annual.length - 1,
+  note: yoy[i] === null ? '' : signedPct(yoy[i]!),
+  tipTitle: `${p.year}${p.estimate ? ' (estimate)' : ''}`,
+  tipBody: `${usdB(p.value)}${yoy[i] === null ? '' : ` · ${signedPct(yoy[i]!)} YoY`}`,
+}));
+---
+
+<section class="view" data-view="market" data-title="Market">
+  <div class="view-head">
+    <p class="view-eyebrow">Market</p>
+    <h1 class="view-title">Size, cycle and mix</h1>
+    <p class="view-lede">
+      WFE grew from {usdB(first.value)} in {first.year} to {usdB(latestActual.value)} in {latestActual.year}, a {
+        pct(cagr, 1)
+      } compound annual growth rate, as AI, cloud and localization lifted capex across every device type.
+    </p>
+  </div>
+
+  <div class="stack">
+    <div class="grid-auto" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr))">
+      <div class="card stat">
+        <p class="stat-label">CAGR {first.year}–{latestActual.year}</p>
+        <p class="stat-value">{pct(cagr, 1)}</p>
+        <p class="stat-note">On actual spend</p>
+      </div>
+      <div class="card stat">
+        <p class="stat-label">Strongest year</p>
+        <p class="stat-value">{annual[best].year}</p>
+        <p class="stat-note">{signedPct(yoy[best]!)} YoY</p>
+      </div>
+      <div class="card stat">
+        <p class="stat-label">Weakest year</p>
+        <p class="stat-value">{annual[worst].year}</p>
+        <p class="stat-note">{signedPct(yoy[worst]!)} YoY</p>
+      </div>
+      <div class="card stat">
+        <p class="stat-label">Regions over $10B</p>
+        <p class="stat-value">{regions.filter((r) => r.value >= 10).length}</p>
+        <p class="stat-note">of {regions.length} tracked</p>
+      </div>
+    </div>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Global WFE spend</h2>
+          <p class="card-sub">USD billions, year-on-year change under each year · hatched bars are estimates</p>
+        </div>
+      </div>
+      <ColumnChart
+        columns={columns}
+        format={usdB}
+        height={240}
+        ariaLabel="Global WFE spend by year with year-on-year change"
+      />
+      <details class="table-view">
+        <summary>View as table</summary>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Year</th><th class="num">WFE (USD B)</th><th class="num">YoY</th><th>Basis</th></tr></thead>
+            <tbody>
+              {
+                annual.map((p, i) => (
+                  <tr>
+                    <td>{p.year}</td>
+                    <td class="num">{p.value}</td>
+                    <td class="num">{yoy[i] === null ? '—' : signedPct(yoy[i]!)}</td>
+                    <td>{p.estimate ? 'Estimate' : 'Actual (approx.)'}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </article>
+
+    <div class="grid-2">
+      <article class="card">
+        <h2 class="card-title">Billings by region, {latestActual.year}</h2>
+        <p class="card-sub mb-4">Where equipment ships, USD billions</p>
+        <BarList
+          ariaLabel="Equipment billings by region"
+          rows={regions.map((r) => ({
+            label: r.label,
+            value: r.value,
+            display: usdB(r.value),
+            tipBody: `${usdB(r.value)} · ${pct((r.value / regionTotal) * 100)}`,
+          }))}
+        />
+        <details class="table-view">
+          <summary>View as table</summary>
+          <table class="data-table">
+            <thead><tr><th>Region</th><th class="num">USD B</th><th class="num">Share</th></tr></thead>
+            <tbody>
+              {
+                regions.map((r) => (
+                  <tr>
+                    <td>{r.label}</td>
+                    <td class="num">{r.value.toFixed(1)}</td>
+                    <td class="num">{pct((r.value / regionTotal) * 100, 1)}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </details>
+      </article>
+
+      <article class="card">
+        <h2 class="card-title">Spend by device, {latestActual.year}</h2>
+        <p class="card-sub mb-4">Share of WFE</p>
+        <SegBar
+          ariaLabel="WFE by end device"
+          parts={deviceMix.map((d) => ({ label: d.label, value: d.share, display: pct(d.share) }))}
+        />
+        <div class="mt-5 grid gap-3">
+          {
+            deviceMix.map((d) => (
+              <div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-2">{d.label}</span>
+                  <span class="font-semibold tabular-nums">{pct(d.share)}</span>
+                </div>
+                <div class="meter mt-1.5">
+                  <span style={`width:${d.share}%`} />
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </article>
+    </div>
+
+    <h2 class="text-lg font-bold mt-4">What drives the cycle</h2>
+    <div class="grid-auto">
+      {
+        marketDrivers.map((d) => (
+          <article class="card">
+            <h3 class="card-title">{d.title}</h3>
+            <p class="text-sm text-2 mt-1.5">{d.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

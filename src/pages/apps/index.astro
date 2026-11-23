@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Image from '~/components/common/Image.astro';
+import { findImage } from '~/utils/images';
+import { getPermalink } from '~/utils/permalinks';
+
+const metadata = {
+  title: 'Apps',
+  description: 'Applications for semiconductor manufacturing: WFE intelligence, MES simulators and process simulations.',
+};
+
+const apps = (await getCollection('apps', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const items = await Promise.all(apps.map(async (a) => ({ a, image: await findImage(a.data.image) })));
+const labels = { mes: 'MES', analytics: 'Intelligence', '3d': '3D simulation', other: 'App' };
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="Apps" title="Applications">
+    <Fragment slot="subtitle">Tools for semiconductor manufacturing: WFE intelligence, MES simulators and process simulations.</Fragment>
+  </HeroText>
+
+  <section class="mx-auto max-w-6xl px-4 sm:px-6 pb-16">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        items.map(({ a, image }) => (
+          <a href={a.data.standalone ? `/apps/${a.id}/` : getPermalink(`/apps/${a.id}`)} class="block group">
+            {image && typeof image !== 'string' && (
+              <Image src={image} alt={a.data.title} class="w-full h-auto rounded mb-4" widths={[400, 800]} sizes="400px" />
+            )}
+            <p class="text-sm text-muted">{labels[a.data.type]} · {a.data.status}</p>
+            <h2 class="text-xl font-bold group-hover:underline">{a.data.title}</h2>
+            <p class="mt-1">{a.data.summary}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</Layout>

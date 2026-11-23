@@ -1,0 +1,26 @@
+---
+import { vendorById } from '~/data/wfe';
+
+export interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const v = vendorById.get(id);
+---
+
+{
+  v ? (
+    <button
+      type="button"
+      class="badge badge-primary"
+      data-sheet-open="vendor-sheet"
+      data-sheet-item={v.id}
+      title={`Open ${v.name}`}
+    >
+      {v.name}
+    </button>
+  ) : (
+    <span class="badge">{id}</span>
+  )
+}

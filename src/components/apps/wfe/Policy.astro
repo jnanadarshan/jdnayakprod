@@ -1,0 +1,60 @@
+---
+import { policy } from '~/data/wfe';
+
+const kinds = [...new Set(policy.map((p) => p.kind))];
+const sorted = [...policy].sort((a, b) => b.date.localeCompare(a.date));
+const years = [...new Set(sorted.map((p) => p.date.slice(0, 4)))];
+const month = (d: string) => new Date(`${d}-01T00:00:00Z`).toLocaleString('en', { month: 'short', timeZone: 'UTC' });
+const kindClass: Record<string, string> = {
+  'Export control': 'badge',
+  Subsidy: 'badge badge-primary',
+  'Industrial policy': 'badge',
+};
+---
+
+<section class="view" data-view="policy" data-title="Policy">
+  <div class="view-head">
+    <p class="view-eyebrow">Policy</p>
+    <h1 class="view-title">Export controls and subsidies</h1>
+    <p class="view-lede">Governments now shape where fabs are built and which tools can ship where. Newest first.</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="chips" data-filter="policy" data-key="kind" role="group" aria-label="Policy type">
+      <button type="button" class="chip" data-value="all" aria-pressed="true">All</button>
+      {
+        kinds.map((k) => (
+          <button type="button" class="chip" data-value={k} aria-pressed="false">
+            {k}
+            <span class="count">{policy.filter((p) => p.kind === k).length}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="timeline" data-filterable="policy">
+    {
+      years.map((y) => (
+        <div class="grid gap-3" data-filter-wrap="policy">
+          <p class="timeline-year">{y}</p>
+          {sorted
+            .filter((p) => p.date.startsWith(y))
+            .map((p) => (
+              <article class="card timeline-item" id={`pol-${policy.indexOf(p)}`} data-item data-f-kind={p.kind}>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class={kindClass[p.kind]}>{p.kind}</span>
+                  <span class="badge">{p.region}</span>
+                  <span class="muted text-xs ml-auto tabular-nums">
+                    {month(p.date)} {y}
+                  </span>
+                </div>
+                <h2 class="card-title mt-2">{p.title}</h2>
+                <p class="text-sm text-2 mt-1">{p.detail}</p>
+              </article>
+            ))}
+        </div>
+      ))
+    }
+  </div>
+</section>

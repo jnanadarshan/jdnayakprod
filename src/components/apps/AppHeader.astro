@@ -1,0 +1,49 @@
+---
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  title: string;
+  /** Initial subtitle; the shell script replaces it with the current view's name. */
+  subtitle?: string;
+  icon?: string;
+  backHref?: string;
+  search?: boolean;
+}
+
+const { title, subtitle = '', icon = 'tabler:apps', backHref = '/apps', search = false } = Astro.props;
+---
+
+<header class="app-header">
+  <div class="app-header-inner glass">
+    <a href={backHref} class="app-icon-btn" aria-label="Back to all apps" title="All apps">
+      <Icon name="tabler:arrow-left" />
+    </a>
+    <div class="app-brand">
+      <span class="app-brand-mark" aria-hidden="true"><Icon name={icon} width={19} height={19} /></span>
+      <span class="app-brand-text">
+        <span class="app-brand-title">{title}</span>
+        <span class="app-brand-sub" data-view-subtitle>{subtitle}</span>
+      </span>
+    </div>
+    <slot />
+    {
+      search && (
+        <button
+          type="button"
+          class="app-search-btn"
+          data-search-open
+          aria-label="Search"
+          aria-keyshortcuts="Control+K Meta+K"
+        >
+          <Icon name="tabler:search" />
+          <span class="label">Search</span>
+          <kbd>⌘K</kbd>
+        </button>
+      )
+    }
+    <button type="button" class="app-icon-btn" data-theme-toggle aria-label="Toggle dark mode" title="Toggle theme">
+      <Icon name="tabler:sun" class="theme-icon-dark" />
+      <Icon name="tabler:moon" class="theme-icon-light" />
+    </button>
+  </div>
+</header>

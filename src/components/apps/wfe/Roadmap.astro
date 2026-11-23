@@ -1,0 +1,65 @@
+---
+import { roadmap, segmentById } from '~/data/wfe';
+
+const areas = [...new Set(roadmap.map((r) => r.area))];
+const years = [...new Set(roadmap.map((r) => r.year))];
+---
+
+<section class="view" data-view="roadmap" data-title="Roadmap">
+  <div class="view-head">
+    <p class="view-eyebrow">Technology roadmap</p>
+    <h1 class="view-title">Inflections that move WFE</h1>
+    <p class="view-lede">
+      Each new device architecture changes which tools a fab buys. The chips under each milestone show the segments that
+      gain the most.
+    </p>
+  </div>
+
+  <div class="toolbar">
+    <div class="chips" data-filter="roadmap" data-key="area" role="group" aria-label="Technology area">
+      <button type="button" class="chip" data-value="all" aria-pressed="true">All</button>
+      {
+        areas.map((a) => (
+          <button type="button" class="chip" data-value={a} aria-pressed="false">
+            {a}
+            <span class="count">{roadmap.filter((r) => r.area === a).length}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="timeline" data-filterable="roadmap">
+    {
+      years.map((y) => (
+        <div class="grid gap-3" data-filter-wrap="roadmap">
+          <p class="timeline-year">{y}</p>
+          {roadmap
+            .map((r, i) => ({ r, i }))
+            .filter(({ r }) => r.year === y)
+            .map(({ r, i }) => (
+              <article
+                class="card timeline-item"
+                id={`rm-${i}`}
+                data-item
+                data-f-area={r.area}
+                data-search={`${r.title} ${r.detail}`}
+              >
+                <span class="badge badge-primary">{r.area}</span>
+                <h2 class="card-title mt-2">{r.title}</h2>
+                <p class="text-sm text-2 mt-1">{r.detail}</p>
+                <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                  <span class="stat-label mr-1">Benefits</span>
+                  {r.impact.map((s) => (
+                    <a href="#segments" data-goto-target={`seg-${s}`} class="badge">
+                      {segmentById.get(s)?.name}
+                    </a>
+                  ))}
+                </div>
+              </article>
+            ))}
+        </div>
+      ))
+    }
+  </div>
+</section>

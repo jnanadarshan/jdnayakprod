@@ -1,0 +1,125 @@
+---
+import { Icon } from 'astro-icon/components';
+import BarList from '~/components/apps/charts/BarList.astro';
+import VendorChip from './VendorChip.astro';
+import { segments, process, latestActual, segmentSize } from '~/data/wfe';
+import { usdB, pct } from './format';
+
+const sorted = [...segments].sort((a, b) => b.share - a.share);
+const top3 = sorted.slice(0, 3).reduce((s, x) => s + x.share, 0);
+---
+
+<section class="view" data-view="segments" data-title="Segments">
+  <div class="view-head">
+    <p class="view-eyebrow">Segments</p>
+    <h1 class="view-title">Where the money goes</h1>
+    <p class="view-lede">
+      Lithography, etch and deposition take about {pct(top3)} of WFE. Sizes below apply each share to {
+        latestActual.year
+      } spend of {usdB(latestActual.value)}.
+    </p>
+  </div>
+
+  <div class="stack">
+    <article class="card">
+      <h2 class="card-title">Segment size, {latestActual.year}</h2>
+      <p class="card-sub mb-4">Approximate USD billions · select a segment for details</p>
+      <BarList
+        ariaLabel="WFE by segment, USD billions"
+        rows={sorted.map((s) => ({
+          label: s.name,
+          value: segmentSize(s),
+          display: usdB(segmentSize(s)),
+          tipBody: `${pct(s.share)} of WFE · ≈ ${usdB(segmentSize(s))}`,
+          href: '#segments',
+          attrs: { 'data-goto-target': `seg-${s.id}` },
+        }))}
+      />
+      <details class="table-view">
+        <summary>View as table</summary>
+        <table class="data-table">
+          <thead><tr><th>Segment</th><th class="num">Share</th><th class="num">≈ USD B</th></tr></thead>
+          <tbody>
+            {
+              sorted.map((s) => (
+                <tr>
+                  <td>{s.name}</td>
+                  <td class="num">{pct(s.share)}</td>
+                  <td class="num">{segmentSize(s).toFixed(1)}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </details>
+    </article>
+
+    <div class="grid-2">
+      {
+        sorted.map((s) => {
+          const steps = process.filter((p) => p.segment === s.id);
+          return (
+            <article class="card" id={`seg-${s.id}`}>
+              <div class="flex items-start gap-3">
+                <span class="app-brand-mark" style="width:40px;height:40px" aria-hidden="true">
+                  <Icon name={s.icon} width={20} height={20} />
+                </span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="card-title text-base">{s.name}</h2>
+                    <span class="badge badge-primary">
+                      {pct(s.share)} · ≈ {usdB(segmentSize(s))}
+                    </span>
+                  </div>
+                  <div class="meter mt-2">
+                    <span style={`width:${(s.share / sorted[0].share) * 100}%`} />
+                  </div>
+                </div>
+              </div>
+              <p class="text-sm text-2 mt-3">{s.summary}</p>
+
+              <h3 class="stat-label mt-4">Leaders</h3>
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                {s.leaders.map((l) => (
+                  <VendorChip id={l} />
+                ))}
+              </div>
+
+              <h3 class="stat-label mt-4">Sub-segments</h3>
+              <ul class="flex flex-wrap gap-1.5 mt-2">
+                {s.subsegments.map((x) => (
+                  <li class="badge">{x}</li>
+                ))}
+              </ul>
+
+              <h3 class="stat-label mt-4">Growth drivers</h3>
+              <ul class="mt-2 grid gap-1.5 text-sm">
+                {s.drivers.map((d) => (
+                  <li class="flex gap-2">
+                    <Icon
+                      name="tabler:trending-up"
+                      class="shrink-0 mt-0.5 text-[var(--app-primary)]"
+                      width={16}
+                      height={16}
+                    />
+                    <span>{d}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {steps.length > 0 && (
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {steps.map((p) => (
+                    <a href="#explorer" data-goto-target={`proc-${p.id}`} class="btn-ghost">
+                      <Icon name="tabler:topology-star-3" /> {p.step} in the process flow
+                    </a>
+                  ))}
+                </div>
+              )}
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

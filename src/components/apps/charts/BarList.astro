@@ -1,0 +1,45 @@
+---
+/** Ranked horizontal bars, one hue, value at the tip. Rows can be links or buttons. */
+export interface BarRow {
+  label: string;
+  value: number;
+  display?: string;
+  tipTitle?: string;
+  tipBody?: string;
+  href?: string;
+  attrs?: Record<string, string>;
+}
+
+export interface Props {
+  rows: BarRow[];
+  max?: number;
+  ariaLabel: string;
+}
+
+const { rows, max = Math.max(...rows.map((r) => r.value)), ariaLabel } = Astro.props;
+---
+
+<div class="bar-list" role="list" aria-label={ariaLabel}>
+  {
+    rows.map((r) => {
+      const Tag = r.href ? 'a' : 'div';
+      return (
+        <Tag
+          href={r.href}
+          class="bar-row"
+          role="listitem"
+          tabindex={r.href ? undefined : 0}
+          data-tip-title={r.tipTitle ?? r.label}
+          data-tip-body={r.tipBody ?? r.display ?? String(r.value)}
+          {...(r.attrs ?? {})}
+        >
+          <span class="bar-row-label">{r.label}</span>
+          <span class="bar-track">
+            <span class="bar-fill" style={`width:calc(${(r.value / max) * 100}% - 52px)`} />
+            <span class="bar-value">{r.display ?? r.value}</span>
+          </span>
+        </Tag>
+      );
+    })
+  }
+</div>

@@ -1,0 +1,156 @@
+---
+import { Icon } from 'astro-icon/components';
+import BarList from '~/components/apps/charts/BarList.astro';
+import { vendors, segmentById } from '~/data/wfe';
+import { usdB, pct } from './format';
+
+const byRevenue = [...vendors].sort((a, b) => b.revenue - a.revenue);
+const max = byRevenue[0].revenue;
+const regions = ['US', 'Europe', 'Japan', 'China'] as const;
+const top5 = byRevenue.slice(0, 5);
+const top5Rev = top5.reduce((s, v) => s + v.revenue, 0);
+---
+
+<section class="view" data-view="vendors" data-title="Vendors">
+  <div class="view-head">
+    <p class="view-eyebrow">Vendors</p>
+    <h1 class="view-title">Who supplies the fabs</h1>
+    <p class="view-lede">
+      The top five, {top5.map((v) => v.name).join(', ')}, together report about {usdB(top5Rev)} in revenue (including services).
+      Chinese vendors are growing fastest from a smaller base.
+    </p>
+  </div>
+
+  <div class="stack">
+    <article class="card">
+      <h2 class="card-title">Revenue, latest fiscal year</h2>
+      <p class="card-sub mb-4">
+        USD billions, approx. · includes services and non-WFE products · select a vendor for details
+      </p>
+      <BarList
+        ariaLabel="Vendor revenue, latest fiscal year"
+        rows={byRevenue.map((v) => ({
+          label: v.name,
+          value: v.revenue,
+          display: usdB(v.revenue),
+          tipBody: `${usdB(v.revenue)} · ${v.fy}`,
+          href: `#vendors`,
+          attrs: { 'data-sheet-open': 'vendor-sheet', 'data-sheet-item': v.id },
+        }))}
+      />
+      <details class="table-view">
+        <summary>View as table</summary>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead
+              ><tr><th>Vendor</th><th>Fiscal year</th><th class="num">Revenue (USD B)</th><th class="num">China</th></tr
+              ></thead
+            >
+            <tbody>
+              {
+                byRevenue.map((v) => (
+                  <tr>
+                    <td>{v.name}</td>
+                    <td>{v.fy}</td>
+                    <td class="num">{v.revenue.toFixed(1)}</td>
+                    <td class="num">{v.china ? pct(v.china) : '—'}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </article>
+
+    <div>
+      <div class="toolbar">
+        <label class="field">
+          <Icon name="tabler:search" />
+          <input
+            type="search"
+            placeholder="Search vendors, products…"
+            data-filter-search="vendors"
+            aria-label="Search vendors"
+          />
+        </label>
+        <label class="field field-select">
+          <Icon name="tabler:arrows-sort" />
+          <select data-sort="vendors" aria-label="Sort vendors">
+            <option value="revenue:desc">Revenue, high to low</option>
+            <option value="revenue:asc">Revenue, low to high</option>
+            <option value="name:asc">Name, A–Z</option>
+            <option value="china:desc">China exposure</option>
+          </select>
+        </label>
+      </div>
+      <div class="toolbar">
+        <div class="chips" data-filter="vendors" data-key="region" role="group" aria-label="Vendor region">
+          <button type="button" class="chip" data-value="all" aria-pressed="true"
+            >All<span class="count">{vendors.length}</span></button
+          >
+          {
+            regions.map((r) => (
+              <button type="button" class="chip" data-value={r} aria-pressed="false">
+                {r}
+                <span class="count">{vendors.filter((v) => v.region === r).length}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <p class="result-count" data-filter-count="vendors" data-one="vendor" data-many="vendors">
+        {vendors.length} vendors
+      </p>
+
+      <div class="grid-auto" data-filterable="vendors">
+        {
+          byRevenue.map((v) => (
+            <button
+              type="button"
+              class="card card-link text-left"
+              id={`vendor-${v.id}`}
+              data-item
+              data-vendor-card={v.id}
+              data-sheet-open="vendor-sheet"
+              data-sheet-item={v.id}
+              data-f-region={v.region}
+              data-s-revenue={v.revenue}
+              data-s-name={v.name}
+              data-s-china={v.china ?? -1}
+              data-search={`${v.name} ${v.hq} ${v.ticker} ${v.products.join(' ')} ${v.focus.map((f) => segmentById.get(f)?.name).join(' ')}`}
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="card-title">{v.name}</h3>
+                  <p class="card-sub">{v.hq}</p>
+                </div>
+                <span class="badge">{v.ticker}</span>
+              </div>
+              <div class="mt-4 flex items-end justify-between gap-3">
+                <div>
+                  <p class="stat-label">Revenue · {v.fy}</p>
+                  <p class="text-2xl font-bold tabular-nums mt-1">{usdB(v.revenue)}</p>
+                </div>
+                <div class="text-right">
+                  <p class="stat-label">China</p>
+                  <p class="text-base font-semibold tabular-nums mt-1">{v.china ? pct(v.china) : '—'}</p>
+                </div>
+              </div>
+              <div class="meter mt-3">
+                <span style={`width:${(v.revenue / max) * 100}%`} />
+              </div>
+              <div class="mt-4 flex flex-wrap gap-1.5">
+                <span class="badge badge-primary">{v.region}</span>
+                {v.focus.map((f) => (
+                  <span class="badge">{segmentById.get(f)?.name}</span>
+                ))}
+              </div>
+            </button>
+          ))
+        }
+      </div>
+      <p class="empty" data-filter-empty="vendors" hidden>No vendors match those filters.</p>
+    </div>
+  </div>
+</section>

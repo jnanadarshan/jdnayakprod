@@ -1,0 +1,42 @@
+---
+/** One whole split into up to four parts, with a legend that carries the values. */
+export interface Part {
+  label: string;
+  value: number;
+  display?: string;
+}
+
+export interface Props {
+  parts: Part[];
+  ariaLabel: string;
+}
+
+const { parts, ariaLabel } = Astro.props;
+const total = parts.reduce((s, p) => s + p.value, 0);
+---
+
+<div role="img" aria-label={ariaLabel}>
+  <div class="seg-bar">
+    {
+      parts.map((p, i) => (
+        <span
+          class={`s${(i % 4) + 1}`}
+          style={`flex:${p.value / total}`}
+          tabindex="0"
+          data-tip-title={p.label}
+          data-tip-body={p.display ?? String(p.value)}
+        />
+      ))
+    }
+  </div>
+  <div class="seg-legend">
+    {
+      parts.map((p, i) => (
+        <span>
+          <i class={`s${(i % 4) + 1}`} />
+          {p.label} <b>{p.display ?? p.value}</b>
+        </span>
+      ))
+    }
+  </div>
+</div>

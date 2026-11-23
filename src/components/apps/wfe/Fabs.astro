@@ -1,0 +1,192 @@
+---
+import { Icon } from 'astro-icon/components';
+import BarList from '~/components/apps/charts/BarList.astro';
+import { fabs, fabStatusOrder, type FabRegion } from '~/data/wfe';
+import { statusStyle } from './format';
+
+const regions = [...new Set(fabs.map((f) => f.region))] as FabRegion[];
+const byRegion = regions.map((r) => ({ r, n: fabs.filter((f) => f.region === r).length })).sort((a, b) => b.n - a.n);
+const statuses = fabStatusOrder.filter((s) => fabs.some((f) => f.status === s));
+const count = (s: string) => fabs.filter((f) => f.status === s).length;
+const head = ['Company', 'Site', 'Region', 'Type', 'Node / product', 'Status', 'First output', 'Announced investment'];
+---
+
+<section class="view" data-view="fabs" data-title="Fab tracker">
+  <div class="view-head">
+    <p class="view-eyebrow">Fab tracker</p>
+    <h1 class="view-title">New capacity around the world</h1>
+    <p class="view-lede">
+      Major greenfield fabs and expansions that will absorb equipment over the next five years. Status and timing
+      reflect public announcements and change often.
+    </p>
+  </div>
+
+  <div class="stack">
+    <div class="grid-auto" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr))">
+      {
+        statuses.map((s) => (
+          <button
+            type="button"
+            class="card text-left card-link"
+            data-status-tile={s}
+            aria-label={`Show ${s.toLowerCase()} fabs`}
+          >
+            <span class={`badge ${statusStyle[s].cls}`}>
+              <Icon name={statusStyle[s].icon} />
+              {s}
+            </span>
+            <p class="stat-value">{count(s)}</p>
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="grid-2">
+      <article class="card">
+        <h2 class="card-title">Projects by region</h2>
+        <p class="card-sub mb-4">Number of tracked fab projects</p>
+        <BarList
+          ariaLabel="Fab projects by region"
+          rows={byRegion.map(({ r, n }) => ({
+            label: r,
+            value: n,
+            display: String(n),
+            tipBody: `${n} project${n === 1 ? '' : 's'}`,
+          }))}
+        />
+      </article>
+      <article class="card">
+        <h2 class="card-title">Projects by type</h2>
+        <p class="card-sub mb-4">Number of tracked fab projects</p>
+        <BarList
+          ariaLabel="Fab projects by type"
+          rows={[...new Set(fabs.map((f) => f.kind))]
+            .map((k) => ({ k, n: fabs.filter((f) => f.kind === k).length }))
+            .sort((a, b) => b.n - a.n)
+            .map(({ k, n }) => ({
+              label: k,
+              value: n,
+              display: String(n),
+              tipBody: `${n} project${n === 1 ? '' : 's'}`,
+            }))}
+        />
+      </article>
+    </div>
+
+    <article class="card">
+      <div class="toolbar">
+        <label class="field">
+          <Icon name="tabler:search" />
+          <input
+            type="search"
+            placeholder="Search company, site, node…"
+            data-filter-search="fabs"
+            aria-label="Search fabs"
+          />
+        </label>
+        <button type="button" class="btn-ghost" data-export="fabs" data-filename="wfe-fab-tracker.csv">
+          <Icon name="tabler:download" /> CSV
+        </button>
+      </div>
+      <div class="toolbar">
+        <div class="chips" data-filter="fabs" data-key="region" role="group" aria-label="Region">
+          <button type="button" class="chip" data-value="all" aria-pressed="true">All regions</button>
+          {
+            byRegion.map(({ r, n }) => (
+              <button type="button" class="chip" data-value={r} aria-pressed="false">
+                {r}
+                <span class="count">{n}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="chips" data-filter="fabs" data-key="status" role="group" aria-label="Status" data-status-chips>
+          <button type="button" class="chip" data-value="all" aria-pressed="true">Any status</button>
+          {
+            statuses.map((s) => (
+              <button type="button" class="chip" data-value={s} aria-pressed="false">
+                {s}
+                <span class="count">{count(s)}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      <p class="result-count" data-filter-count="fabs" data-one="project" data-many="projects">
+        {fabs.length} projects
+      </p>
+
+      <div class="table-wrap">
+        <table class="data-table responsive">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Site</th>
+              <th>Region</th>
+              <th>Type</th>
+              <th>Node / product</th>
+              <th>Status</th>
+              <th>First output</th>
+              <th>Investment</th>
+            </tr>
+          </thead>
+          <tbody data-filterable="fabs" data-csv-head={JSON.stringify(head)}>
+            {
+              fabs.map((f) => (
+                <tr
+                  id={`fab-${f.id}`}
+                  data-item
+                  data-f-region={f.region}
+                  data-f-status={f.status}
+                  data-search={`${f.company} ${f.site} ${f.region} ${f.kind} ${f.node} ${f.status}`}
+                  data-csv={JSON.stringify([
+                    f.company,
+                    f.site,
+                    f.region,
+                    f.kind,
+                    f.node,
+                    f.status,
+                    f.start,
+                    f.investment ?? '',
+                  ])}
+                >
+                  <td class="lead font-semibold">{f.company}</td>
+                  <td data-label="Site">{f.site}</td>
+                  <td data-label="Region">{f.region}</td>
+                  <td data-label="Type">{f.kind}</td>
+                  <td data-label="Node">{f.node}</td>
+                  <td data-label="Status">
+                    <span class={`badge ${statusStyle[f.status].cls}`}>
+                      <Icon name={statusStyle[f.status].icon} />
+                      {f.status}
+                    </span>
+                  </td>
+                  <td data-label="First output" class="tabular-nums">
+                    {f.start}
+                  </td>
+                  <td data-label="Investment" class="text-2">
+                    {f.investment ?? '—'}
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="empty" data-filter-empty="fabs" hidden>No projects match those filters.</p>
+    </article>
+  </div>
+</section>
+
+<script>
+  // Status tiles act as shortcuts to the status filter.
+  for (const tile of document.querySelectorAll<HTMLElement>('[data-status-tile]')) {
+    tile.addEventListener('click', () => {
+      const chip = document.querySelector<HTMLElement>(`[data-status-chips] [data-value="${tile.dataset.statusTile}"]`);
+      chip?.click();
+      chip?.closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+</script>

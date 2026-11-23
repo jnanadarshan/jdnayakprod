@@ -1,0 +1,26 @@
+{
+  "id": "/apps/",
+  "name": "JD Nayak Apps",
+  "short_name": "Apps",
+  "description": "Applications for semiconductor manufacturing: WFE intelligence, MES simulators and process simulations.",
+  "start_url": "/apps/",
+  "scope": "/apps/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#030620",
+  "theme_color": "#030620",
+  "categories": ["business", "productivity", "education"],
+  "icons": [
+    { "src": "/apps/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/apps/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "WFE Intelligence Hub",
+      "short_name": "WFE Hub",
+      "url": "/apps/wfe-intelligence-hub/",
+      "icons": [{ "src": "/apps/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

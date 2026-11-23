@@ -1,0 +1,73 @@
+---
+import { Icon } from 'astro-icon/components';
+
+export interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+export interface Props {
+  items: NavItem[];
+  /** Overflow views shown in the "More" popover. */
+  more?: NavItem[];
+  /** Extra links at the bottom of the popover (e.g. back to the site). */
+  links?: { href: string; label: string; icon: string }[];
+}
+
+const { items, more = [], links = [] } = Astro.props;
+---
+
+<nav class="pill-nav glass" aria-label="App sections" data-pill-nav>
+  <div class="pill-nav-row">
+    {
+      items.map((item, i) => (
+        <a
+          href={`#${item.id}`}
+          class="pill-btn"
+          data-nav={item.id}
+          aria-current={i === 0 ? 'page' : undefined}
+          title={item.label}
+        >
+          <Icon name={item.icon} />
+          <span class="label">{item.label}</span>
+        </a>
+      ))
+    }
+    {
+      (more.length > 0 || links.length > 0) && (
+        <button
+          type="button"
+          class="pill-btn pill-more-btn"
+          data-pill-more
+          aria-haspopup="true"
+          aria-expanded="false"
+          title="More"
+        >
+          <Icon name="tabler:dots" />
+          <span class="label">More</span>
+        </button>
+      )
+    }
+  </div>
+  {
+    (more.length > 0 || links.length > 0) && (
+      <div class="pill-popover" role="menu" data-pill-popover>
+        {more.length > 0 && <div class="pill-popover-label">More views</div>}
+        {more.map((item) => (
+          <a href={`#${item.id}`} data-nav={item.id} data-nav-more role="menuitem">
+            <Icon name={item.icon} />
+            {item.label}
+          </a>
+        ))}
+        {links.length > 0 && more.length > 0 && <hr />}
+        {links.map((l) => (
+          <a href={l.href} role="menuitem">
+            <Icon name={l.icon} />
+            {l.label}
+          </a>
+        ))}
+      </div>
+    )
+  }
+</nav>

@@ -1,0 +1,84 @@
+---
+import { Icon } from 'astro-icon/components';
+import { vendors, segmentById, process } from '~/data/wfe';
+import { usdB, pct } from './format';
+
+const rank = new Map([...vendors].sort((a, b) => b.revenue - a.revenue).map((v, i) => [v.id, i + 1]));
+---
+
+<dialog class="sheet" id="vendor-sheet" aria-labelledby="vendor-sheet-title">
+  <div class="sheet-head">
+    <span class="sheet-grip" aria-hidden="true"></span>
+    <h2 class="text-lg font-bold" id="vendor-sheet-title" data-sheet-title>Vendor</h2>
+    <button type="button" class="app-icon-btn" data-sheet-close aria-label="Close"><Icon name="tabler:x" /></button>
+  </div>
+  <div class="sheet-body">
+    {
+      vendors.map((v) => {
+        const steps = process.filter((p) => p.tools.some((t) => t.vendors.includes(v.id)));
+        return (
+          <article data-sheet-panel={v.id} data-sheet-name={v.name} hidden>
+            <p class="text-sm text-2">{v.summary}</p>
+            <dl class="kv mt-5 card" style="padding:14px 16px">
+              <dt>Headquarters</dt>
+              <dd>{v.hq}</dd>
+              <dt>Ticker</dt>
+              <dd>{v.ticker}</dd>
+              <dt>Revenue ({v.fy})</dt>
+              <dd>{usdB(v.revenue)}</dd>
+              <dt>Revenue rank (tracked)</dt>
+              <dd>
+                #{rank.get(v.id)} of {vendors.length}
+              </dd>
+              <dt>China share of revenue</dt>
+              <dd>{v.china ? `≈ ${pct(v.china)}` : 'Not tracked'}</dd>
+              <dt>Region</dt>
+              <dd>{v.region}</dd>
+            </dl>
+
+            <h3 class="stat-label mt-5">Segments</h3>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              {v.focus.map((f) => (
+                <a href="#segments" data-goto-target={`seg-${f}`} data-sheet-close class="badge badge-primary">
+                  {segmentById.get(f)?.name}
+                </a>
+              ))}
+            </div>
+
+            <h3 class="stat-label mt-5">Key products</h3>
+            <ul class="mt-2 grid gap-1.5 text-sm">
+              {v.products.map((p) => (
+                <li class="flex gap-2">
+                  <Icon
+                    name="tabler:chevron-right"
+                    class="shrink-0 mt-0.5 text-[var(--app-text-3)]"
+                    width={16}
+                    height={16}
+                  />
+                  {p}
+                </li>
+              ))}
+            </ul>
+
+            {steps.length > 0 && (
+              <>
+                <h3 class="stat-label mt-5">Appears in the process flow</h3>
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  {steps.map((p) => (
+                    <a href="#explorer" data-goto-target={`proc-${p.id}`} data-sheet-close class="badge">
+                      {p.step}
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <a href={v.site} target="_blank" rel="noopener" class="btn-ghost mt-6">
+              <Icon name="tabler:external-link" /> Investor relations
+            </a>
+          </article>
+        );
+      })
+    }
+  </div>
+</dialog>
