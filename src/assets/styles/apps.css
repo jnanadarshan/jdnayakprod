@@ -21,6 +21,7 @@
   --app-shadow-sm: 0 1px 3px rgb(15 23 42 / 8%);
   --app-shadow-md: 0 8px 28px rgb(15 23 42 / 12%);
   --app-radius: 16px;
+  --app-max: 1440px; /* content + header width */
 
   /* Chart roles (validated default categorical order; text never wears these). */
   --series-1: #2a78d6;
@@ -134,7 +135,7 @@
 }
 .app-header-inner {
   position: relative;
-  max-width: 1200px;
+  max-width: var(--app-max);
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -372,7 +373,7 @@
 /* ---------------------------------------------------------------- Layout */
 
 .app-main {
-  max-width: 1200px;
+  max-width: var(--app-max);
   margin: 0 auto;
   padding: 8px 16px calc(var(--safe-bottom) + 112px);
 }
@@ -380,6 +381,16 @@
   .app-main {
     padding-left: 24px;
     padding-right: 24px;
+  }
+}
+@media (min-width: 1280px) {
+  .app-main {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .app-header {
+    padding-left: 32px;
+    padding-right: 32px;
   }
 }
 .js .view:not(.is-active) {
