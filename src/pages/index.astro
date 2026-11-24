@@ -2,6 +2,7 @@
 import { themedImage } from '~/utils/themed-image';
 import Layout from '~/layouts/PageLayout.astro';
 
+import TcsLink from '~/components/ui/TcsLink.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Features from '~/components/widgets/Features.astro';
 import Features3 from '~/components/widgets/Features3.astro';
@@ -50,7 +51,7 @@ const metadata = {
       <span class="text-accent dark:text-white highlight">Autonomous to Agentic</span>
     </Fragment>
     <Fragment slot="subtitle">
-      I'm Jnanadarshan (JD) Nayak. I head Semiconductor Strategy &amp; the Semiconductor Manufacturing Practice at TCS. I design how AI, and increasingly
+      I'm Jnanadarshan (JD) Nayak. I head Semiconductor Strategy &amp; the Semiconductor Manufacturing Practice at <TcsLink />. I design how AI, and increasingly
       agentic AI, gets infused into fab operations. Outside client work I build software, simulators and educational
       tools, contribute to open source, run a self-hosted homelab, and design and print my own hardware.
     </Fragment>

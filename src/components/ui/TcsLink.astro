@@ -1,0 +1,51 @@
+---
+// Inline link to TCS with a hover/focus preview card (full name + snapshot of tcs.com).
+const url = 'https://www.tcs.com';
+const snapshot = `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=640&h=400`;
+---
+
+<span class="tcs-link relative inline-block">
+  <a
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="underline decoration-dotted underline-offset-4 hover:text-primary focus-visible:text-primary"
+    aria-describedby="tcs-card">TCS</a
+  >
+  <span
+    id="tcs-card"
+    role="tooltip"
+    class="tcs-card pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-72 -translate-x-1/2 rounded-lg border border-gray-200 bg-white p-3 text-left text-sm shadow-xl dark:border-slate-700 dark:bg-slate-800"
+  >
+    <span class="tcs-shot mb-2 block aspect-[8/5] overflow-hidden rounded bg-gray-100 dark:bg-slate-700">
+      <img
+        src={snapshot}
+        alt="Snapshot of the tcs.com homepage"
+        width="640"
+        height="400"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        class="h-full w-full object-cover object-top"
+        onerror="this.parentElement.style.display='none'"
+      />
+    </span>
+    <strong class="block text-base text-gray-900 dark:text-white">Tata Consultancy Services</strong>
+    <span class="block text-xs text-gray-600 dark:text-slate-300">
+      Global IT services, consulting and business solutions organization, part of the Tata Group.
+    </span>
+    <span class="mt-1 block text-xs text-primary">tcs.com ↗</span>
+  </span>
+</span>
+
+<style>
+  .tcs-card {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease;
+  }
+  .tcs-link:hover .tcs-card,
+  .tcs-link:focus-within .tcs-card {
+    opacity: 1;
+    visibility: visible;
+  }
+</style>
