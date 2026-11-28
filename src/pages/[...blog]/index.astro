@@ -37,7 +37,16 @@ const metadata = merge(
     openGraph: {
       type: 'article',
       ...(image
-        ? { images: [{ url: image, width: (image as ImageMetadata)?.width, height: (image as ImageMetadata)?.height }] }
+        ? {
+            images: [
+              {
+                // Pass the original "~/assets/..." path so adaptOpenGraphImages can swap an SVG for its PNG card.
+                url: typeof post.image === 'string' ? post.image : image,
+                width: (image as ImageMetadata)?.width,
+                height: (image as ImageMetadata)?.height,
+              },
+            ],
+          }
         : {}),
     },
   },

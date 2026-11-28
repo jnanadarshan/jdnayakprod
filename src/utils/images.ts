@@ -64,7 +64,15 @@ export const adaptOpenGraphImages = async (
   const adaptedImages = await Promise.all(
     images.map(async (image) => {
       if (image?.url) {
-        const resolvedImage = (await findImage(image.url)) as ImageMetadata | string | undefined;
+        let resolvedImage = (await findImage(image.url)) as ImageMetadata | string | undefined;
+
+        // Social networks ignore SVG og:image. Use the PNG twin from scripts/build-og-images.mjs,
+        // or the site default card if it has not been generated.
+        if (typeof image.url === 'string' && /\.svg$/i.test(image.url)) {
+          const png = image.url.replace(/\/([^/]+)\.svg$/i, '/og/$1.png');
+          resolvedImage = ((await findImage(png)) ||
+            (await findImage('~/assets/images/default.png'))) as ImageMetadata | undefined;
+        }
         if (!resolvedImage) {
           return {
             url: '',
