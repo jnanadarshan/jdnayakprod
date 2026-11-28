@@ -58,6 +58,6 @@ export const footerData = {
     { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/jnanadarshan' },
   ],
   footNote: `
-    © ${new Date().getFullYear()} Jnanadarshan Nayak. Views expressed here are my own and do not represent those of my employer or its clients. <br class="sm:hidden" /><a class="underline" href="/llms.txt">For LLMs and AI agents: read /llms.txt</a>
+    © ${new Date().getFullYear()} Jnanadarshan Nayak. Views expressed here are my own and do not represent those of my employer or its clients.
   `,
 };
