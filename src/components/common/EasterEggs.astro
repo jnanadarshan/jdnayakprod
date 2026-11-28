@@ -27,14 +27,21 @@
       '@keyframes ee-pop{0%{opacity:0;transform:translate(-50%,10px)}12%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}' +
       '@keyframes ee-trace{to{stroke-dashoffset:0}}' +
       '@keyframes ee-fade{0%{opacity:0}15%,80%{opacity:1}100%{opacity:0}}' +
-      '@keyframes ee-scurry{from{transform:translateX(-60px)}to{transform:translateX(110vw)}}';
+      '@keyframes ee-scurry{from{transform:translateX(-60px)}to{transform:translateX(110vw)}}' +
+      '@keyframes ee-wafer{0%{opacity:0;transform:scale(.3) rotate(0deg)}18%{opacity:1;transform:scale(1) rotate(calc(var(--r) * .2))}70%{opacity:1}100%{opacity:0;transform:scale(.45) rotate(var(--r))}}' +
+      '@keyframes ee-flash{0%{opacity:0;transform:scale(.2)}30%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(2.2)}}' +
+      '@keyframes ee-expose{0%{opacity:0}25%{opacity:1}100%{opacity:.5}}' +
+      '@keyframes ee-pulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}' +
+      '@keyframes ee-slidein{0%{opacity:0;transform:translate(-24px,-50%)}12%,85%{opacity:1;transform:translate(0,-50%)}100%{opacity:0;transform:translate(-24px,-50%)}}';
     document.head.appendChild(styleEl);
 
+    var lastToast;
     function toast(msg) {
-      var t = document.createElement('div');
+      if (lastToast) lastToast.remove(); // one message at a time when eggs fire back to back
+      var t = lastToast = document.createElement('div');
       t.textContent = msg;
       t.style.cssText =
-        'position:fixed;left:50%;bottom:32px;transform:translateX(-50%);max-width:90vw;padding:10px 18px;border-radius:9999px;' +
+        'position:fixed;left:50%;bottom:32px;transform:translateX(-50%);width:max-content;max-width:min(90vw,640px);box-sizing:border-box;text-align:center;padding:10px 18px;border-radius:20px;' +
         'background:rgba(15,23,42,.92);color:#e2e8f0;font:500 14px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;' +
         'box-shadow:0 8px 30px rgba(0,0,0,.35);z-index:2147483001;pointer-events:none;animation:ee-pop 3.2s ease both';
       document.body.appendChild(t);
@@ -62,6 +69,78 @@
       clear(7000);
     }
 
+    // Wafer with a die grid, a few failed (red) dies and the orientation notch.
+    function waferSvg() {
+      var n = 9, sz = 120, c = sz / 2, cell = 12, dies = '';
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+        var cx = x * cell - (n * cell) / 2 + c + cell / 2, cy = y * cell - (n * cell) / 2 + c + cell / 2;
+        var dx = cx - c, dy = cy - c;
+        if (Math.sqrt(dx * dx + dy * dy) < c - 9) {
+          var hue = 200 + Math.round(((x + y) / (2 * n)) * 90);
+          dies += '<rect x="' + (cx - 5) + '" y="' + (cy - 5) + '" width="10" height="10" rx="1" fill="' +
+            (Math.random() < 0.06 ? '#f87171' : 'hsl(' + hue + ',70%,60%)') + '" fill-opacity=".85"/>';
+        }
+      }
+      return '<svg viewBox="0 0 ' + sz + ' ' + sz + '" width="100%" height="100%">' +
+        '<circle cx="' + c + '" cy="' + c + '" r="' + (c - 1.5) + '" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>' +
+        '<path d="M' + (c - 7) + ' ' + (sz - 2) + ' a7 7 0 0 1 14 0z" fill="#475569"/>' + dies + '</svg>';
+    }
+
+    // EUV scanner vignette: tin-plasma source, two mirrors, beam onto a wafer, then step-and-scan exposure.
+    function euvSvg(still) {
+      var a = function (css) { return still ? '' : ' style="' + css + '"'; };
+      var box = 'transform-box:fill-box;transform-origin:center;';
+      // Wafer seen in perspective: draw it flat, squash it vertically.
+      var dies = '', fields = '', R = 104, cell = 16, k = 0;
+      for (var y = -6; y < 6; y++) for (var x = -6; x < 6; x++) {
+        var cx = x * cell + cell / 2, cy = y * cell + cell / 2;
+        if (Math.sqrt(cx * cx + cy * cy) < R - 12) dies += '<rect x="' + (cx - 7) + '" y="' + (cy - 7) + '" width="14" height="14" rx="1.5" fill="#64748b" fill-opacity=".55"/>';
+      }
+      // Exposure fields in serpentine (step-and-scan) order, covering the whole wafer.
+      var steps = [];
+      for (var fy = -3; fy <= 2; fy++) {
+        var row = [];
+        for (var fx = -3; fx <= 2; fx++) {
+          var mx = fx * 32 + 16, my = fy * 32 + 16;
+          if (Math.sqrt(mx * mx + my * my) < R - 14) row.push([fx * 32 + 1, fy * 32 + 1]);
+        }
+        if ((fy + 3) % 2) row.reverse();
+        steps = steps.concat(row);
+      }
+      for (var s = 0; s < steps.length; s++) {
+        fields += '<rect x="' + steps[s][0] + '" y="' + steps[s][1] + '" width="30" height="30" rx="2" fill="url(#ee-euvf)"' +
+          (still ? ' opacity=".5"' : ' opacity="0" style="animation:ee-expose .6s ' + (1.5 + s * 0.1).toFixed(2) + 's ease-out forwards"') + '/>';
+      }
+      return '<svg viewBox="0 0 300 470" width="100%" style="display:block">' +
+        '<defs>' +
+        '<linearGradient id="ee-euvb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0abfc"/><stop offset="1" stop-color="#a855f7"/></linearGradient>' +
+        '<radialGradient id="ee-euvg"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#f0abfc"/><stop offset="1" stop-color="#a855f7" stop-opacity="0"/></radialGradient>' +
+        '<linearGradient id="ee-euvf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e879f9"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>' +
+        '<linearGradient id="ee-mir" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#475569"/><stop offset=".5" stop-color="#e2e8f0"/><stop offset="1" stop-color="#475569"/></linearGradient>' +
+        '<filter id="ee-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>' +
+        '</defs>' +
+        '<text x="24" y="34" fill="#c4b5fd" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" letter-spacing="1">EUV · 13.5 nm</text>' +
+        // source: laser-hit tin droplet
+        '<circle cx="60" cy="78" r="30" fill="url(#ee-euvg)"' + a(box + 'animation:ee-pulse .5s ease-in-out 6') + '/>' +
+        '<circle cx="60" cy="78" r="4" fill="#fff"/>' +
+        // mirrors
+        '<rect x="208" y="104" width="62" height="9" rx="4.5" fill="url(#ee-mir)" transform="rotate(-8 239 108)"/>' +
+        '<rect x="34" y="226" width="62" height="9" rx="4.5" fill="url(#ee-mir)" transform="rotate(14 65 230)"/>' +
+        // beam: glow + core, drawn source -> M1 -> M2 -> wafer
+        '<path d="M60 78 L236 112 L66 232 L150 372" fill="none" stroke="#c084fc" stroke-width="16" stroke-linejoin="round" opacity=".45" filter="url(#ee-blur)" stroke-dasharray="560"' +
+        (still ? '' : ' stroke-dashoffset="560" style="animation:ee-trace .9s .35s ease-in forwards"') + '/>' +
+        '<path d="M60 78 L236 112 L66 232 L150 372" fill="none" stroke="url(#ee-euvb)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="560"' +
+        (still ? '' : ' stroke-dashoffset="560" style="animation:ee-trace .9s .35s ease-in forwards"') + '/>' +
+        // stage and wafer
+        '<ellipse cx="150" cy="402" rx="128" ry="40" fill="#1e293b"/>' +
+        '<g transform="translate(150 390) scale(1 .32)">' +
+        '<circle r="' + R + '" fill="#cbd5e1" stroke="#94a3b8" stroke-width="4"/>' + dies + fields + '</g>' +
+        // exposure flash where the beam lands
+        '<ellipse cx="150" cy="376" rx="34" ry="16" fill="url(#ee-euvg)"' + (still ? ' opacity="0"' : ' opacity="0" style="' + box + 'animation:ee-flash .9s 1.25s ease-out forwards"') + '/>' +
+        '<text x="150" y="458" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11">step · scan · repeat</text>' +
+        '</svg>';
+    }
+
     function chipRain() {
       var colors = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#f472b6'];
       rain(46, function () { return chipSvg(Math.round(rnd(22, 44)), colors[Math.floor(Math.random() * colors.length)]); });
@@ -75,23 +154,27 @@
       wafer: function () {
         toast('300 mm of pure silicon. Mind the notch.');
         var l = ensureLayer();
-        var n = 15, s = 240, c = s / 2, cell = 22, dies = '';
-        for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
-          var cx = x * cell - (n * cell) / 2 + c + cell / 2, cy = y * cell - (n * cell) / 2 + c + cell / 2;
-          var dx = cx - c, dy = cy - c;
-          if (Math.sqrt(dx * dx + dy * dy) < c - 14) {
-            var hue = 200 + Math.round(((x + y) / (2 * n)) * 90);
-            var bad = Math.random() < 0.06;
-            dies += '<rect x="' + (cx - 9) + '" y="' + (cy - 9) + '" width="18" height="18" rx="1.5" fill="' + (bad ? '#f87171' : 'hsl(' + hue + ',70%,60%)') + '" fill-opacity=".85"/>';
-          }
+        // Scatter small wafers over a jittered grid, skipping the centre cell so the page stays readable.
+        var cols = innerWidth < 640 ? 3 : 5, rows = innerWidth < 640 ? 4 : 3, cells = [];
+        for (var r = 0; r < rows; r++) for (var q = 0; q < cols; q++) {
+          if (r === Math.floor(rows / 2) && q === Math.floor(cols / 2)) continue;
+          cells.push([q, r]);
         }
-        var w = document.createElement('div');
-        w.style.cssText = 'position:absolute;left:50%;top:50%;margin:-' + c * 1.2 + 'px 0 0 -' + c * 1.2 + 'px;width:' + s * 1.2 + 'px;height:' + s * 1.2 + 'px;animation:ee-fade 4.2s ease both';
-        w.innerHTML = '<svg viewBox="0 0 ' + s + ' ' + s + '" width="100%" height="100%" style="' + (reduce ? '' : 'animation:ee-spin 4.2s linear') + '">' +
-          '<circle cx="' + c + '" cy="' + c + '" r="' + (c - 2) + '" fill="#cbd5e1" stroke="#64748b" stroke-width="3"/>' +
-          '<path d="M' + (c - 14) + ' ' + (s - 3) + ' a14 14 0 0 1 28 0z" fill="#0f172a"/>' + dies + '</svg>';
-        l.appendChild(w);
-        clear(4400);
+        cells.sort(function () { return Math.random() - 0.5; });
+        var count = Math.min(cells.length, innerWidth < 640 ? 6 : 12);
+        for (var k = 0; k < count; k++) {
+          var size = Math.round(rnd(48, innerWidth < 640 ? 84 : 112));
+          var cw = innerWidth / cols, ch = innerHeight / rows;
+          var left = cells[k][0] * cw + rnd(0, Math.max(0, cw - size));
+          var top = cells[k][1] * ch + rnd(0, Math.max(0, ch - size));
+          var w = document.createElement('div');
+          w.innerHTML = waferSvg();
+          w.style.cssText = 'position:absolute;left:' + left + 'px;top:' + top + 'px;width:' + size + 'px;height:' + size + 'px;opacity:0;' +
+            '--r:' + (Math.random() < 0.5 ? -1 : 1) * Math.round(rnd(360, 900)) + 'deg;' +
+            'animation:' + (reduce ? 'ee-fade' : 'ee-wafer') + ' ' + rnd(2.0, 3.0).toFixed(2) + 's ' + rnd(0, 0.6).toFixed(2) + 's ease-in-out forwards';
+          l.appendChild(w);
+        }
+        clear(3800);
       },
       moore: function () { toast("Moore's law: transistor count doubles about every two years. For now."); },
       etch: function () {
@@ -100,12 +183,15 @@
         rain(60, function () { return '<div style="width:2px;height:' + Math.round(rnd(14, 40)) + 'px;background:linear-gradient(#a78bfa,transparent);border-radius:2px"></div>'; });
       },
       litho: function () {
-        toast('193 nm light, 13.5 nm EUV, and a very expensive mirror.');
+        toast('13.5 nm EUV light, a tin plasma and some very expensive mirrors.');
         var l = ensureLayer();
-        var b = document.createElement('div');
-        b.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(167,139,250,.55),rgba(56,189,248,.25) 45%,transparent 70%);animation:ee-fade 1.8s ease both';
-        l.appendChild(b);
-        clear(2000);
+        var p = document.createElement('div');
+        p.style.cssText = 'position:absolute;left:max(12px,3vw);top:50%;width:min(300px,72vw);transform:translateY(-50%);' +
+          'border-radius:20px;background:#030620;border:1px solid rgba(168,85,247,.35);box-shadow:0 20px 60px rgba(76,29,149,.45);opacity:0;' +
+          'animation:' + (reduce ? 'ee-fade' : 'ee-slidein') + ' 5.4s ease both';
+        p.innerHTML = euvSvg(reduce);
+        l.appendChild(p);
+        clear(5600);
       },
       yield: function () { toast('Die yield: 99.9%. (Nobody believes the other 0.1%.)'); },
       bug: function () {
