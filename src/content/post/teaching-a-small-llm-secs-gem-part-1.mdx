@@ -25,7 +25,7 @@ That makes it a good test for a small language model. I don't mean a frontier mo
 This is a two-part write-up of that project, which I'm doing in public as I learn LLM training from zero.
 
 - **Part 1 (this post):** the setup, the data, and the first three fine-tunes. Each run fixed one problem and exposed a new one.
-- **[Part 2](/teaching-a-small-llm-secs-gem-part-2):** document-grounded data, a 1.7B vs 4B comparison, a held-out "golden" exam, and what the results say about where fine-tuning stops and retrieval has to take over.
+- **Part 2 (coming soon):** document-grounded data, a 1.7B vs 4B comparison, a held-out "golden" exam, and what the results say about where fine-tuning stops and retrieval has to take over.
 
 I won't share the training files. Some of the later data is derived from licensed standards and vendor documentation I can't redistribute. Everything quoted here is generic, public SECS/GEM knowledge written in my own words, plus the model's own answers.
 
@@ -282,4 +282,8 @@ Total compute cost: $0.
 5. **Replay data must look like real use.** General examples need the same system prompt and a sensible share of tokens, not of examples.
 6. **Keep the failures.** Every run, including the broken ones, is in my experiment log with its hypothesis, settings and scorecard. The failures taught me more than the successes.
 
-In **[Part 2](/teaching-a-small-llm-secs-gem-part-2)**, I add document-grounded training data and a 126-question held-out exam, and run the comparison I had been putting off: does a 4B model actually beat a 1.7B model when the data is identical? I got the first answer wrong, and the reason is the most useful lesson of the project.
+In **Part 2**, coming soon, I add document-grounded training data and a 126-question held-out exam, and run the comparison I had been putting off: does a 4B model actually beat a 1.7B model when the data is identical? I got the first answer wrong, and the reason is the most useful lesson of the project.
+
+---
+
+_**AI disclosure:** This post has been enhanced and modified using AI, including research, editing and the illustrations. The experiments, results and conclusions are my own._
