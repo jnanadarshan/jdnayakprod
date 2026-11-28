@@ -1,0 +1,30 @@
+---
+// Collapsible block for long data tables and raw examples inside blog posts.
+// Usage in MDX (keep blank lines around the Markdown inside):
+//   <Collapsible title="Full scorecard">
+//
+//   | a | b |
+//   |---|---|
+//
+//   </Collapsible>
+export interface Props {
+  title: string;
+  open?: boolean;
+}
+const { title, open = false } = Astro.props;
+---
+
+<details
+  open={open}
+  class="group my-6 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 px-4 [&_table]:my-3 [&_table]:text-sm"
+>
+  <summary
+    class="cursor-pointer select-none list-none py-3 font-semibold text-slate-700 dark:text-slate-200 hover:text-primary flex items-center gap-2 [&::-webkit-details-marker]:hidden"
+  >
+    <span class="inline-block transition-transform group-open:rotate-90" aria-hidden="true">▸</span>
+    {title}
+  </summary>
+  <div class="pb-3 overflow-x-auto">
+    <slot />
+  </div>
+</details>

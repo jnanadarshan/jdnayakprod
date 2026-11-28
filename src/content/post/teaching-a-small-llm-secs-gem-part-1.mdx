@@ -1,0 +1,285 @@
+---
+publishDate: 2026-11-28T00:00:00Z
+draft: false
+author: JD Nayak
+title: 'Teaching a Small LLM to Speak SECS/GEM, Part 1: Style Is Cheap, Facts Are Not'
+excerpt: "I fine-tuned a 1.7-billion-parameter open model on SECS/GEM factory-automation knowledge using a free GPU. In three runs it went from calling S5F1 'Synchronous Ethernet' to 100% on the facts it had seen. It also learned to make up confident answers about the facts it had not. Here is the data, the scorecards and what each failure taught me."
+image: ~/assets/images/secsgem-llm-part1.svg
+category: AI × Semiconductor
+tags:
+  - LLM
+  - fine-tuning
+  - QLoRA
+  - SECS/GEM
+  - factory automation
+  - learning in public
+---
+
+import ThemedImage from '~/components/ui/ThemedImage.astro';
+import Collapsible from '~/components/ui/Collapsible.astro';
+
+Anyone who has integrated a tool into a 300 mm fab knows the routine. A host log shows an `S6F11` that never arrived. You open the equipment's GEM manual, check that the report was defined with `S2F33`, linked with `S2F35` and enabled with `S2F37`, and then you find out which of the three the equipment quietly rejected. It is careful, repetitive lookup work, and the answers sit in thick manuals and standards documents.
+
+That makes it a good test for a small language model. I don't mean a frontier model in the cloud. I mean a **1.5 to 4 billion parameter open model** that runs on a laptop or on an air-gapped server inside the fab, where equipment logs and recipes never leave the building.
+
+This is a two-part write-up of that project, which I'm doing in public as I learn LLM training from zero.
+
+- **Part 1 (this post):** the setup, the data, and the first three fine-tunes. Each run fixed one problem and exposed a new one.
+- **[Part 2](/teaching-a-small-llm-secs-gem-part-2):** document-grounded data, a 1.7B vs 4B comparison, a held-out "golden" exam, and what the results say about where fine-tuning stops and retrieval has to take over.
+
+I won't share the training files. Some of the later data is derived from licensed standards and vendor documentation I can't redistribute. Everything quoted here is generic, public SECS/GEM knowledge written in my own words, plus the model's own answers.
+
+## The working hypothesis
+
+Before training anything, I wrote down what I believed a small model could and couldn't do:
+
+> **Fine-tuning teaches skills, format and vocabulary. Retrieval supplies exact, equipment-specific facts. Tools guarantee correctness.**
+
+No 2B model should be trusted to memorise every SVID, CEID and ALID of every tool on the floor. Those numbers differ by equipment model and software version. What a small model _can_ plausibly learn is how SECS/GEM fits together: which message does what, what the reply is, why a T3 timeout happens, and what to check next.
+
+The experiments below were designed to test that belief, one change at a time.
+
+## The setup: a free GPU and a 4-bit model
+
+The budget for this phase was **$0**. Training ran on the free NVIDIA T4 GPUs that Kaggle provides: 16 GB of memory, a weekly quota of about 30 GPU-hours, and sessions that queue when demand is high. My own Mac (an M2 with 8 GB) is only good for running finished models and preparing data.
+
+A 1.7-billion-parameter model doesn't fit a full fine-tune on a T4. Updating every weight, with gradients and optimizer state, needs around 27 GB. So I used **QLoRA**:
+
+1. Load the base model in **4-bit** precision. Each weight is stored as one of 16 levels, which cuts the model from about 3.4 GB to about 1.3 GB.
+2. **Freeze** those weights completely.
+3. Next to each large weight matrix, add two thin trainable matrices (the LoRA adapter) and train only those.
+
+<ThemedImage
+  name="qlora-adapter"
+  alt="QLoRA diagram: the input passes through a frozen 4-bit weight matrix and, in parallel, two small trainable matrices A and B whose output is added. Stats: 17.4 million trainable parameters, a 70 MB adapter, 4.8 GB peak GPU memory"
+/>
+
+The trainable part is tiny: **17.4 million parameters, about 1% of the model**, saved as a 70 MB file. The first run peaked at 4.8 GB of GPU memory and trained in three and a half minutes. Because the adapter starts at zero, step 0 is exactly the base model. Anything that changes afterwards was learned from my data.
+
+One practical surprise came out of the smoke test. PyTorch reported that the T4 _supports_ bf16, the number format most fine-tuning guides recommend. It doesn't, natively. The T4 is an older architecture that only emulates bf16, so the right choice is fp16. Checking the GPU's compute capability, rather than trusting the "supported" flag, avoids a slow and confusing first run.
+
+<Collapsible title="Training configuration (identical across Part 1 runs)">
+
+| Setting                  | Value                                                         |
+| ------------------------ | ------------------------------------------------------------- |
+| Base model               | Qwen3-1.7B, non-thinking mode                                 |
+| Method                   | QLoRA: NF4 4-bit base, double quantization, fp16 compute      |
+| LoRA rank / alpha        | r = 16, α = 32, dropout 0.05                                  |
+| Target modules           | all 7 linear projections (q, k, v, o, gate, up, down)         |
+| Learning rate            | 2e-4, cosine schedule, 5 warm-up steps                        |
+| Epochs                   | 3                                                             |
+| Effective batch size     | 16                                                            |
+| Loss                     | answer tokens only; the question and system prompt are masked |
+| Optimizer                | paged AdamW, 8-bit                                            |
+| Hardware                 | 1 × NVIDIA T4 (16 GB), free tier                              |
+| Trainable parameters     | 17,432,576                                                    |
+
+</Collapsible>
+
+## The data: start with a table, not a document dump
+
+The tempting approach is to pour manuals into the model and hope. I did the opposite and started with something I could check line by line: a **reference table of SECS-II messages**, written in my own words. Each row has the stream and function, the message name, the direction (host to equipment or the reverse), whether a reply is expected (the W-bit), and the reply message.
+
+The first version had 73 messages covering the everyday GEM capabilities: establishing communications, are-you-there, online and offline requests, status variables, equipment constants, dynamic event reports, alarms, remote commands, process programs, trace data, spooling and clock.
+
+**Twelve messages were held out completely.** They don't appear anywhere in the training data. They're there to answer one question: does the model learn the _system_, or only the rows it saw?
+
+From that table a script generates question and answer pairs. Here is what they look like. This is generic, public knowledge, but the shape is the same as the real data:
+
+<Collapsible title="Sample training records (illustrative)">
+
+Every example is a short chat with a fixed system prompt:
+
+```json
+{
+  "messages": [
+    { "role": "system", "content": "You are a SECS/GEM factory-automation assistant..." },
+    { "role": "user", "content": "What is S1F13?" },
+    {
+      "role": "assistant",
+      "content": "S1F13 is Establish Communications Request. Either the host or the equipment can send it, with the W-bit set. The reply is S1F14 (Establish Communications Request Acknowledge), which carries COMMACK."
+    }
+  ]
+}
+```
+
+The kinds of question generated from one row of the table:
+
+| Type    | Example question                                                 | What it tests               |
+| ------- | ---------------------------------------------------------------- | --------------------------- |
+| name    | "What is S2F41?"                                                 | number → name               |
+| which   | "Which message does the host use to send a remote command?"      | purpose → number            |
+| reply   | "What is the secondary reply to S2F33?"                          | the odd/even reply rule     |
+| reverse | "What are the stream and function for Define Report?"            | name → number (added later) |
+| stream  | "What is Stream 5 used for?"                                     | grouping context            |
+
+A typical SML answer the model is expected to produce for a dynamic event report setup:
+
+```text
+S2F33 W                       // Define Report
+  <L[2]
+    <U4 1>                    // DATAID
+    <L[1]
+      <L[2]
+        <U4 10>               // RPTID
+        <L[2] <U4 1001> <U4 1002>>   // VIDs in the report
+      >
+    >
+  >.
+S2F35 W  ...                  // Link Event Report: CEID -> RPTID
+S2F37 W  <L[2] <BOOLEAN True> <L[1] <U4 300>>>.   // enable CEID 300
+```
+
+</Collapsible>
+
+Every run is scored on the same **probe set**: questions in new phrasings about seen messages, questions about the held-out messages, and a handful of general questions (maths, code, translation) to catch _forgetting_, where domain training damages what the model already knew.
+
+<ThemedImage
+  name="secsgem-training-loop"
+  alt="Five-step experiment loop: hand-written facts, a training set, a QLoRA run on a free GPU, a fixed probe set, and a scorecard. Then read the failures, change one variable, and repeat"
+/>
+
+## EXP-001: it learned the voice, not the facts
+
+**Change:** none yet. This was the first end-to-end loop: 397 training examples, about 4 to 8 per message.
+
+The base model knew essentially nothing about SECS-II. Asked about S5F1, it said "Synchronous Ethernet". Asked about S2F23, it described a synchronous motor.
+
+After three and a half minutes of training, the answers _looked_ perfect. They had the right format and the right vocabulary, used real message names, and stopped cleanly. But they were frequently wrong:
+
+- "S5F1 is **Process Program Load Grant**." (It is Alarm Report Send. Load Grant is S7F2.)
+- "Use **S7F1** (Alarm Report Send)." (Right name, wrong number.)
+- For a held-out message: "S2F23 is **Date and Time Set Request**." (It is Trace Initialize Send.) This was said with complete confidence, in the trained style.
+
+The model had learned to _sound like_ a SECS/GEM engineer while mixing up which name belongs to which number.
+
+<Collapsible title="EXP-001 scorecard (probe questions answered correctly)">
+
+| Probe group         | Base model | EXP-001        |
+| ------------------- | ---------- | -------------- |
+| Seen: name (20)     | 0          | 7 (35%)        |
+| Seen: reply (9)     | 8          | 8              |
+| Seen: which (12)    | 0          | 0              |
+| Held-out: name (12) | 0          | 0              |
+| Held-out: reply (6) | 3          | 5              |
+| Held-out: which (6) | 0          | 0              |
+| General (manual)    | fine       | fine, no forgetting |
+
+Training: 75 steps, 3.5 minutes, peak 4.8 GB. Train loss 4.57 → 0.19; evaluation loss flattened at 0.65 after epoch 2, an early sign of overfitting.
+
+</Collapsible>
+
+Two inferences from this run shaped everything after it:
+
+1. **Style is learned in a few steps. Binding a fact to its ID takes far more varied exposure.** Four to eight near-identical examples per message was enough to copy the voice, but not enough to tie "Alarm Report Send" to "S5F1".
+2. **Rules generalise better than facts.** Held-out "what is the reply?" questions improved from 3 to 5 out of 6. The model picked up the SECS-II convention that a primary message has an odd function number and its reply is the next even number, and applied it to messages it had never seen.
+
+## EXP-002: variety fixed the facts, and broke something else
+
+**Change:** data only. The same messages, model, settings and probes, but **1,421 examples** instead of 397: 12 question phrasings per message, rotating answer wordings, _reverse_ questions (name to number) and stream context ("Stream 5 is Exception Handling..."). I checked that no probe question and no held-out message ID appeared anywhere in the training set.
+
+The seen-fact scores jumped: **20 of 20** on names, **11 of 12** on "which message", **9 of 9** on replies. The only miss was a near-neighbour mix-up between S6F15 and S6F19, two event-report requests with similar purposes.
+
+Held-out facts stayed at **zero**, and the hallucinations got _more_ confident and less consistent. One answer said "S2F43 ... is the reply to S2F42". S2F43 has an odd function number, so it can't be a reply. Under the odd/even rule the model had learned, it contradicted itself.
+
+<Collapsible title="EXP-002 scorecard vs EXP-001">
+
+| Probe group      | Base | EXP-001 | EXP-002                                  |
+| ---------------- | ---- | ------- | ---------------------------------------- |
+| Seen: name       | 0/20 | 7/20    | **20/20**                                |
+| Seen: reply      | 8/9  | 8/9     | **9/9**                                  |
+| Seen: which      | 0/12 | 0/12    | **11/12**                                |
+| Held-out: name   | 0/12 | 0/12    | 0/12                                     |
+| Held-out: reply  | 3/6  | 5/6     | 6/6                                      |
+| Held-out: which  | 0/6  | 0/6     | 0/6                                      |
+| General (manual) | fine | fine    | ⚠️ the Python answer lost its code        |
+
+Training: 265 steps, 10.3 minutes, peak 5.6 GB.
+
+**Confound:** 3.5× more data also meant 3.5× more optimizer steps. A control run (the old data trained for more epochs) would separate "more variety" from "more steps". I noted it and haven't run it yet.
+
+</Collapsible>
+
+Two more lessons came out of this run.
+
+**Loss went the wrong way while accuracy soared.** Evaluation loss _rose_ from 0.60 to 0.72 while seen-fact accuracy went from about 20% to nearly 100%. That isn't a contradiction. Loss measures how likely the model finds one exact reference sentence. Accuracy measures whether the fact is right. A third of the evaluation items were held-out messages the model now got _confidently_ wrong, and confident wrong answers are penalised heavily by loss. **Task metrics, not loss, decide which model is better.**
+
+**The first sign of forgetting.** Asked to "write a Python function that reverses a string", the EXP-002 model replied with one line: "Use the `[::-1]` slicing syntax in Python." No code. Fourteen hundred terse domain answers had taught it that _all_ answers are short.
+
+## EXP-003: more knowledge, general replay, and a domain hijack
+
+**Change:** three things at once. I relaxed the one-change rule on purpose to push further.
+
+- **28 new messages** taught with the EXP-002 recipe (101 in total).
+- **48 concepts** beyond message lookup: HSMS timers (T3, T5, T6, T7, T8), connection states, Select/Deselect/Separate procedures, acknowledge codes, GEM state models, SECS-I, SML notation and the GEM300 standards (E40, E87, E90, E94...). Each had 4 phrasings and one answer.
+- **General "replay" data**: 103 everyday instruction examples from an openly licensed dataset, mixed in to prevent forgetting.
+
+One detail matters more than it seems: **I sized the replay by answer text, not by example count.** General answers are about five times longer than domain answers, so "20% of examples" would have been 54% of the tokens the model learns from. I targeted 35% of the graded answer text instead.
+
+<Collapsible title="EXP-003 scorecard">
+
+| Probe group                            | Base          | EXP-003                    |
+| -------------------------------------- | ------------- | -------------------------- |
+| Seen messages: name / reply / which    | 0/20, 8/9, 0/12 | **20/20, 9/9, 12/12**    |
+| 28 new messages: name / reply / which  | 0/28, 8/14, 0/14 | **28/28, 14/14, 13/14** |
+| Concepts (all 48)                      | 1/48          | **21/48 (44%)**            |
+| Held-out: name / reply / which         | 0/12, 3/6, 0/6 | 2/12\*, 6/6, 0/6          |
+| General, scored (11)                   | 10/11         | 9/11                       |
+| Mean general answer length             | 183 chars     | 205 chars                  |
+
+\* Both held-out "passes" were false positives. For S5F5/S5F6 the model answered "List **Enabled** Alarm Request", which is S5F7's name, and the keyword check accepted "list ... alarm". True held-out accuracy was still zero.
+
+**Concepts by topic:**
+
+| Topic                       | Correct |
+| --------------------------- | ------- |
+| Acknowledge codes           | 6/7     |
+| HSMS (timers, procedures)   | 8/12    |
+| SECS-I                      | 1/1     |
+| GEM state models            | 2/5     |
+| Troubleshooting             | 2/5     |
+| SECS-II data formats        | 1/5     |
+| SML notation                | 1/3     |
+| GEM data (SVID, CEID, ...)  | 0/4     |
+| GEM300 standards            | 0/6     |
+
+Training: 444 steps, 27.5 minutes, peak 8.65 GB. The job sat in Kaggle's queue for about three hours waiting for a free T4.
+
+</Collapsible>
+
+<ThemedImage
+  name="secsgem-part1-scores"
+  alt="Grouped bar chart. Seen facts: base 20%, EXP-001 37%, EXP-002 98%, EXP-003 100%. Unseen facts: 0% in every run. Unseen reply rule: 50%, 83%, 100%, 100%."
+/>
+
+**What worked.** The message recipe generalised: 28 brand-new messages reached 100%, 100% and 93% on the first try. Replay brought the Python code back, and general answers got longer again.
+
+**Concept interference.** Concepts that share an answer template had their contents swapped. "T6 is the connect separation timeout ... 10 s" is T5's answer. It also called E40 "Carrier Management" (E40 covers process jobs; carrier management is E87), described E84 as "Carrier Management Services" (E84 is the parallel I/O handoff with the automated material handling system) and called E94 "Material Tracking" (E94 is control job management). The model learns the _shape_ ("Tx is the ... timeout", "SEMI Exx (name) defines ...") before it learns which content belongs to which label. Four phrasings per concept wasn't enough to separate them.
+
+**The domain hijack.** "What is 17 multiplied by 23?" got the answer "**S1F17**." That one was my design flaw. Every domain example and every probe used the SECS/GEM system prompt, but the replay examples had _no_ system prompt. So the model learned a very clean rule: _if the SECS prompt is present, answer in SECS_. Engineers will ask general questions inside a SECS/GEM assistant all the time, so the replay data has to sit under the same prompt.
+
+**The scorer is part of the system.** The keyword false positives above were a warning that a cheap automatic scorer will eventually flatter a model. That becomes a central theme in Part 2.
+
+## What Part 1 taught me
+
+<Collapsible title="All Part 1 runs at a glance" open>
+
+| Run     | One-line change                       | Train examples | Time on T4 | Peak memory | Headline result                                     |
+| ------- | ------------------------------------- | -------------- | ---------- | ----------- | --------------------------------------------------- |
+| EXP-000 | smoke test                            | –              | ~2 min     | –           | pipeline works; use fp16, not bf16, on a T4         |
+| EXP-001 | first fine-tune                       | 397            | 3.5 min    | 4.8 GB      | style learned, facts mis-bound                      |
+| EXP-002 | 12 phrasings per fact + reverse       | 1,421          | 10.3 min   | 5.6 GB      | seen facts ~100%; first forgetting                  |
+| EXP-003 | +messages, +concepts, +general replay | 2,369          | 27.5 min   | 8.65 GB     | new messages 100%; concepts 44%; domain hijack      |
+
+Total compute cost: $0.
+
+</Collapsible>
+
+1. **Style is cheap; binding is expensive.** A model picks up the voice of a domain in minutes. Tying each fact to its identifier takes many _varied_ exposures, not repetition of the same sentence.
+2. **Fine-tuning cannot add knowledge it never saw, and it makes those gaps look authoritative.** Every held-out fact stayed at zero across all three runs, while the wrong answers became more fluent. In a production-adjacent domain, a confident wrong remote command is worse than "I don't know".
+3. **Rules transfer, lookups don't.** The odd/even reply convention worked on unseen messages. Message names did not. That's a strong argument for putting exact lookups in a tool or retrieval layer and spending training effort on reasoning and procedure.
+4. **Loss is not quality.** Judge runs by task metrics on a fixed probe set, and keep the probe set frozen so scores stay comparable.
+5. **Replay data must look like real use.** General examples need the same system prompt and a sensible share of tokens, not of examples.
+6. **Keep the failures.** Every run, including the broken ones, is in my experiment log with its hypothesis, settings and scorecard. The failures taught me more than the successes.
+
+In **[Part 2](/teaching-a-small-llm-secs-gem-part-2)**, I add document-grounded training data and a 126-question held-out exam, and run the comparison I had been putting off: does a 4B model actually beat a 1.7B model when the data is identical? I got the first answer wrong, and the reason is the most useful lesson of the project.
